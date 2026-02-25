@@ -117,11 +117,11 @@ void generatePlane(float size, int divisions, const string& filename) {
 	}
 
 	//numVertices de uma face é o numero de divisions dessa face, logo divisionsdivisions, vezes 6 (3 vertices por triangulo)
-	int numVertices = divisions divisions * 6;
+	int numVertices = divisions * divisions * 6;
 	file << numVertices << "\n";
 
 	float half = size / 2.0f;
-	float step = size / divisions;
+	float step = size / (float) divisions;
 
 	for (int i = 0; i < divisions; ++i) {
 		for (int j = 0; j < divisions; ++j) {
@@ -135,14 +135,16 @@ void generatePlane(float size, int divisions, const string& filename) {
 			float x2 = x1 + step;
 			float z2 = z1 + step;
 
-			// Plano XZ (Y fixo em 0)
+			// Plano XZ 
+			// Triângulo 1 
 			file << x1 << " 0 " << z1 << "\n";
+			file << x2 << " 0 " << z2 << "\n";
 			file << x1 << " 0 " << z2 << "\n";
-			file << x2 << " 0 " << z2 << "\n";
 
+			// Triângulo 2 
 			file << x1 << " 0 " << z1 << "\n";
-			file << x2 << " 0 " << z2 << "\n";
 			file << x2 << " 0 " << z1 << "\n";
+			file << x2 << " 0 " << z2 << "\n";
 		}
 	}
 
@@ -200,11 +202,9 @@ void generateSphere(float radius, int slices, int stacks, const string& filename
 			file << x4 << " " << y4 << " " << z4 << '\n';
 			file << x3 << " " << y3 << " " << z3 << '\n';
 		}
-
-		file.close();
-		cout << "i => Esfera gerada com sucesso! " << numVertices << " vertices gravados em: " << filename << endl;
 	}
-
+	file.close();
+	cout << "i => Esfera gerada com sucesso! " << numVertices << " vertices gravados em: " << filename << endl;
 
 }
 
@@ -232,8 +232,8 @@ void generateCone(float radius, float height, int slices, int stacks, const stri
 
 		file << "0.0 0.0 0.0\n";
 
-		file << (radius * sin(angle2)) << " 0.0 " << (radius * cos(angle2)) << "\n";
-		file << (radius * sin(angle2)) << " 0.0 " << (radius * cos(angle2)) << "\n";
+		file << (radius * cos(angle2)) << " 0.0 " << (radius * sin(angle2)) << "\n";
+		file << (radius * cos(angle1)) << " 0.0 " << (radius * sin(angle1)) << "\n";
 	}
 
 	// topo
@@ -248,18 +248,10 @@ void generateCone(float radius, float height, int slices, int stacks, const stri
 			float angle1 = j * angleStep;
 			float angle2 = (j + 1) * angleStep;
 
-			//baixo esquerda
-			float x1 = r1 * sin(angle1);
-			float z1 = r1 * cos(angle1);
-			//baixo direita
-			float x2 = r1 * sin(angle2);
-			float z2 = r1 * cos(angle2);
-			//cima esquerda
-			float x3 = r2 * sin(angle1);
-			float z3 = r2 * cos(angle1);
-			//cima direita
-			float x4 = r2 * sin(angle2);
-			float z4 = r2 * cos(angle2);
+			float x1 = r1 * cos(angle1); float z1 = r1 * sin(angle1); // Baixo Esquerda
+			float x2 = r1 * cos(angle2); float z2 = r1 * sin(angle2); // Baixo Direita
+			float x3 = r2 * cos(angle1); float z3 = r2 * sin(angle1); // Cima Esquerda
+			float x4 = r2 * cos(angle2); float z4 = r2 * sin(angle2); // Cima Direita
 
 			file << x1 << " " << h1 << " " << z1 << "\n";
 			file << x2 << " " << h1 << " " << z2 << "\n";
@@ -269,10 +261,9 @@ void generateCone(float radius, float height, int slices, int stacks, const stri
 			file << x4 << " " << h2 << " " << z4 << "\n";
 			file << x3 << " " << h2 << " " << z3 << "\n";
 		}
-
-		file.close();
-		cout << " Conse gerado com sucesso! " << totalVertices << " verices gravados em: " << filename << endl;
 	}
+	file.close();
+	cout << " Conse gerado com sucesso! " << totalVertices << " verices gravados em: " << filename << endl;
 
 }
 
