@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -112,9 +114,128 @@ void generatePlane(float size, int divisions, const string& filename) {
 }
 
 void generateSphere(float radius, int slices, int stacks, const string& filename) {
+	ofstream file(filename);
+	if (!file.is_open()) {
+		cout << "# => Error ao abrir ficheiro!" << endl;
+		return;
+	}
+
+	// i -> stacks quadrados
+	int numVertices = slices * stacks * 6;
+	file << numVertices << "\n";
+
+	// angulo a andar a cada setp
+	float sliceStep = (2 * M_PI) / slices;
+
+	// angulo do topo até a parte de baixo
+	float stackStep = M_PI / stacks;
+
+	for (int i = 0; i < stacks; ++i) {
+		float stackAngle1 = (-M_PI / 2.0f) + (i * stackStep);
+		float stackAngle2 = (-M_PI / 2.0f) + ((i + 1) * stackStep);
+
+		for (int j = 0; j < slices; ++j) {
+			float sliceAngle1 = j * sliceStep;
+			float sliceAngle2 = (j + 1) * sliceStep;
+
+			// baixo esquerda
+			float x1 = radius * cos(stackAngle1) * sin(sliceAngle1);
+			float y1 = radius * sin(stackAngle1);
+			float z1 = radius * cos(stackAngle1) * cos(sliceAngle1);
+			// baixo direita
+			float x2 = radius * cos(stackAngle1) * sin(sliceAngle2);
+			float y2 = radius * sin(stackAngle1);
+			float z2 = radius * cos(stackAngle1) * cos(sliceAngle2);
+			// cima esquerda 
+			float x3 = radius * cos(stackAngle2) * sin(sliceAngle1);
+			float y3 = radius * sin(stackAngle2);
+			float z3 = radius * cos(stackAngle2) * cos(sliceAngle1);
+			// cima direita
+			float x4 = radius * cos(stackAngle2) * sin(sliceAngle2);
+			float y4 = radius * sin(stackAngle2);
+			float z4 = radius * cos(stackAngle2) * cos(sliceAngle2);
+
+			file << x1 << " " << y1 << " " << z1 << '\n';
+			file << x2 << " " << y2 << " " << z2 << '\n';
+			file << x4 << " " << y4 << " " << z4 << '\n';
+
+			file << x1 << " " << y1 << " " << z1 << '\n';
+			file << x4 << " " << y4 << " " << z4 << '\n';
+			file << x3 << " " << y3 << " " << z3 << '\n';
+		}
+
+		file.close();
+		cout << "i => Esfera gerada com sucesso! " << numVertices << " vertices gravados em: " << filename << endl;
+	}
+
+
 }
 
 void generateCone(float radius, float height, int slices, int stacks, const string& filename) {
+	ofstream file(filename);
+	if (!file.is_open()) {
+		cout << "# => Error ao abrir ficheiro!" << endl;
+		return;
+	}
+
+	int numVerticesBase = slices * 3;
+
+	int numVerticesLaterias = stacks * slices * 6;
+
+	int totalVertices = numVerticesBase + numVerticesLaterias;
+	file << totalVertices << '\n';
+
+	float angleStep = (2.0f * M_PI) / slices;
+	float heightStep = height / stacks;
+
+	// base
+	for (int i = 0; i < slices; ++i) {
+		float angle1 = i * angleStep;
+		float angle2 = (i + 1) * angleStep;
+
+		file << "0.0 0.0 0.0\n";
+
+		file << (radius * sin(angle2)) << " 0.0 " << (radius * cos(angle2)) << "\n";
+		file << (radius * sin(angle2)) << " 0.0 " << (radius * cos(angle2)) << "\n";
+	}
+
+	// topo
+	for (int i = 0; i < stacks; ++i) {
+		float h1 = i * heightStep;
+		float r1 = radius * (1.0f - (float)i / stacks);
+
+		float h2 = (i+1) * heightStep;
+		float r2 = radius * (1.0f - (float)(i+1) / stacks);
+
+		for (int j = 0; j < slices; ++j) {
+			float angle1 = j * angleStep;
+			float angle2 = (j + 1) * angleStep;
+
+			//baixo esquerda
+			float x1 = r1 * sin(angle1);
+			float z1 = r1 * cos(angle1);
+			//baixo direita
+			float x2 = r1 * sin(angle2);
+			float z2 = r1 * cos(angle2);
+			//cima esquerda
+			float x3 = r2 * sin(angle1);
+			float z3 = r2 * cos(angle1);
+			//cima direita
+			float x4 = r2 * sin(angle2);
+			float z4 = r2 * cos(angle2);
+
+			file << x1 << " " << h1 << " " << z1 << "\n";
+			file << x2 << " " << h1 << " " << z2 << "\n";
+			file << x3 << " " << h2 << " " << z3 << "\n";
+
+			file << x2 << " " << h1 << " " << z2 << "\n";
+			file << x4 << " " << h2 << " " << z4 << "\n";
+			file << x3 << " " << h2 << " " << z3 << "\n";
+		}
+
+		file.close();
+		cout << " Conse gerado com sucesso! " << totalVertices << " verices gravados em: " << filename << endl;
+	}
 
 }
 
