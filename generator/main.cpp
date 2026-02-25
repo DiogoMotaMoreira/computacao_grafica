@@ -110,7 +110,44 @@ void generateBox(float dimension, int divisions, const string& filename) {
 }
 
 void generatePlane(float size, int divisions, const string& filename) {
+	ofstream file(filename);
+	if (!file.is_open()) {
+		cout << "# => Erro ao abrir ficheiro!" << endl;
+		return;
+	}
 
+	//numVertices de uma face é o numero de divisions dessa face, logo divisionsdivisions, vezes 6 (3 vertices por triangulo)
+	int numVertices = divisions divisions * 6;
+	file << numVertices << "\n";
+
+	float half = size / 2.0f;
+	float step = size / divisions;
+
+	for (int i = 0; i < divisions; ++i) {
+		for (int j = 0; j < divisions; ++j) {
+
+			// ==========================================
+			// 1. Face Plano (Y fixo em 0)
+			// z1, z2 mapeiam no Z | x1, x2 mapeiam no X
+			// ==========================================
+			float x1 = -half + (j * step);
+			float z1 = -half + (i * step);
+			float x2 = x1 + step;
+			float z2 = z1 + step;
+
+			// Plano XZ (Y fixo em 0)
+			file << x1 << " 0 " << z1 << "\n";
+			file << x1 << " 0 " << z2 << "\n";
+			file << x2 << " 0 " << z2 << "\n";
+
+			file << x1 << " 0 " << z1 << "\n";
+			file << x2 << " 0 " << z2 << "\n";
+			file << x2 << " 0 " << z1 << "\n";
+		}
+	}
+
+	file.close();
+	cout << "i => Plano gerado: " << numVertices << " vertices em " << filename << endl;
 }
 
 void generateSphere(float radius, int slices, int stacks, const string& filename) {
