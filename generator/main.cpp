@@ -196,9 +196,9 @@ void generateSphere(float radius, int slices, int stacks, const string& filename
 
 			file << x1 << " " << y1 << " " << z1 << '\n';
 			file << x2 << " " << y2 << " " << z2 << '\n';
-			file << x4 << " " << y4 << " " << z4 << '\n';
+			file << x3 << " " << y3 << " " << z3 << '\n';
 
-			file << x1 << " " << y1 << " " << z1 << '\n';
+			file << x2 << " " << y2 << " " << z2 << '\n';
 			file << x4 << " " << y4 << " " << z4 << '\n';
 			file << x3 << " " << y3 << " " << z3 << '\n';
 		}

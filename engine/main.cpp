@@ -123,7 +123,7 @@ void loadConfig(const char* xmlFilename) {
     if (group) {
         XMLElement* models = group->FirstChildElement("models");
         if (models) {
-            // Ciclo para iterar sobre TODOS os <model> dentro de <models> (ex: test_1_5.xml tem dois)
+            // Ciclo para iterar sobre TODOS os <model> dentro de <models>
             for (XMLElement* mod = models->FirstChildElement("model"); mod != nullptr; mod = mod->NextSiblingElement("model")) {
                 const char* fileAttr = mod->Attribute("file");
                 if (fileAttr) {
@@ -146,7 +146,6 @@ void changeSize(int w, int h) {
     glLoadIdentity();
     glViewport(0, 0, w, h);
 
-    // Usa os parâmetros dinâmicos lidos do XML!
     gluPerspective(projFov, ratio, projNear, projFar);
 
     glMatrixMode(GL_MODELVIEW);
@@ -162,7 +161,7 @@ void renderScene(void) {
         lookAtX, lookAtY, lookAtZ,
         upX, upY, upZ);
 
-    // 1. Desenhar Eixos (Idêntico aos testes)
+    // 1. Desenhar Eixos
     glBegin(GL_LINES);
     // Eixo X - Vermelho
     glColor3f(1.0f, 0.0f, 0.0f);
@@ -181,7 +180,7 @@ void renderScene(void) {
     glEnd();
 
     // 2. Desenhar a Geometria Carregada
-    glColor3f(1.0f, 1.0f, 1.0f); // Branco (como nas imagens de teste)
+    glColor3f(1.0f, 1.0f, 1.0f); // Branco
 
     glBegin(GL_TRIANGLES);
     // Iteramos de 3 em 3 porque cada vértice tem (X, Y, Z)
@@ -210,7 +209,6 @@ int main(int argc, char** argv) {
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(100, 100);
 
-    // Usar os valores de janela lidos do XML
     glutInitWindowSize(winW, winH);
     glutCreateWindow("Motor 3D - CG Fase 1");
 
@@ -222,7 +220,6 @@ int main(int argc, char** argv) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    // Wireframe obrigatório para a Fase 1 (tal como nas imagens dos testes)
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // 6. Arrancar ciclo principal
