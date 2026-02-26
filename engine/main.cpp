@@ -1,86 +1,232 @@
 #include <iostream>
-#include <string>
+#include <stdlib.h>
 #include <fstream>
+#include <vector>
+#include <string>
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
+#include "tinyxml2.h"
 
 using namespace std;
+using namespace tinyxml2;
 
-void generatePlane(float size, int divisions, const string& filename) {
+// ==========================================
+// ESTRUTURAS DE DADOS (Memória RAM)
+// ==========================================
+// O nosso vetor global que guardará todos os vértices lidos dos ficheiros .3d
+// Formato: [X1, Y1, Z1, X2, Y2, Z2, ...]
+vector<float> allVertices;
 
+// ==========================================
+// VARIÁVEIS GLOBAIS (Câmara e Janela)
+// ==========================================
+// Valores por defeito (caso o XML falhe ou omita algo)
+int winW = 512, winH = 512;
+
+float camPosX = 10.0f, camPosY = 10.0f, camPosZ = 10.0f;
+float lookAtX = 0.0f, lookAtY = 0.0f, lookAtZ = 0.0f;
+float upX = 0.0f, upY = 1.0f, upZ = 0.0f;
+float projFov = 60.0f, projNear = 1.0f, projFar = 1000.0f;
+
+// ==========================================
+// LEITURA DOS FICHEIROS .3D
+// ==========================================
+void load3DFile(const string& filename) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "# => ERRO: Nao foi possivel abrir o ficheiro 3D: " << filename << endl;
+        return;
+    }
+
+    int numVertices;
+    if (!(file >> numVertices)) {
+        cout << "# => ERRO: Ficheiro " << filename << " vazio ou invalido!" << endl;
+        return;
+    }
+
+    float x, y, z;
+    // Ler os N vértices e adicionar ao nosso vetor global em memória
+    for (int i = 0; i < numVertices; ++i) {
+        file >> x >> y >> z;
+        allVertices.push_back(x);
+        allVertices.push_back(y);
+        allVertices.push_back(z);
+    }
+
+    file.close();
+    cout << "i => Carregado ficheiro: " << filename << " (" << numVertices << " vertices)" << endl;
 }
 
-void generateBox(float dimension, int divisions, const string& filename) {
+// ==========================================
+// LEITURA DO XML (TinyXML-2)
+// ==========================================
+void loadConfig(const char* xmlFilename) {
+    XMLDocument doc;
 
+    if (doc.LoadFile(xmlFilename) != XML_SUCCESS) {
+        cout << "# => ERRO: Falha ao carregar o XML: " << xmlFilename << endl;
+        exit(1);
+    }
+
+    XMLElement* world = doc.FirstChildElement("world");
+    if (!world) {
+        cout << "# => ERRO: Tag <world> nao encontrada no XML!" << endl;
+        exit(1);
+    }
+
+    // 1. Ler Window
+    XMLElement* window = world->FirstChildElement("window");
+    if (window) {
+        window->QueryIntAttribute("width", &winW);
+        window->QueryIntAttribute("height", &winH);
+    }
+
+    // 2. Ler Camera
+    XMLElement* camera = world->FirstChildElement("camera");
+    if (camera) {
+        XMLElement* pos = camera->FirstChildElement("position");
+        if (pos) {
+            pos->QueryFloatAttribute("x", &camPosX);
+            pos->QueryFloatAttribute("y", &camPosY);
+            pos->QueryFloatAttribute("z", &camPosZ);
+        }
+
+        XMLElement* look = camera->FirstChildElement("lookAt");
+        if (look) {
+            look->QueryFloatAttribute("x", &lookAtX);
+            look->QueryFloatAttribute("y", &lookAtY);
+            look->QueryFloatAttribute("z", &lookAtZ);
+        }
+
+        XMLElement* up = camera->FirstChildElement("up");
+        if (up) {
+            up->QueryFloatAttribute("x", &upX);
+            up->QueryFloatAttribute("y", &upY);
+            up->QueryFloatAttribute("z", &upZ);
+        }
+
+        XMLElement* proj = camera->FirstChildElement("projection");
+        if (proj) {
+            proj->QueryFloatAttribute("fov", &projFov);
+            proj->QueryFloatAttribute("near", &projNear);
+            proj->QueryFloatAttribute("far", &projFar);
+        }
+    }
+
+    // 3. Ler Modelos
+    XMLElement* group = world->FirstChildElement("group");
+    if (group) {
+        XMLElement* models = group->FirstChildElement("models");
+        if (models) {
+            // Ciclo para iterar sobre TODOS os <model> dentro de <models> (ex: test_1_5.xml tem dois)
+            for (XMLElement* mod = models->FirstChildElement("model"); mod != nullptr; mod = mod->NextSiblingElement("model")) {
+                const char* fileAttr = mod->Attribute("file");
+                if (fileAttr) {
+                    load3DFile(fileAttr);
+                }
+            }
+        }
+    }
 }
 
-void generateSphere(float radius, int slices, int stacks, const string& filename) {
+// ==========================================
+// FUNÇÕES GLUT
+// ==========================================
+void changeSize(int w, int h) {
+    if (h == 0) h = 1;
+
+    float ratio = w * 1.0 / h;
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glViewport(0, 0, w, h);
+
+    // Usa os parâmetros dinâmicos lidos do XML!
+    gluPerspective(projFov, ratio, projNear, projFar);
+
+    glMatrixMode(GL_MODELVIEW);
 }
 
-void generateCone(float radius, float height, int slices, int stacks, const string& filename) {
+void renderScene(void) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glLoadIdentity();
+
+    // Configurar câmara dinâmica
+    gluLookAt(camPosX, camPosY, camPosZ,
+        lookAtX, lookAtY, lookAtZ,
+        upX, upY, upZ);
+
+    // 1. Desenhar Eixos (Idêntico aos testes)
+    glBegin(GL_LINES);
+    // Eixo X - Vermelho
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glVertex3f(-100.0f, 0.0f, 0.0f);
+    glVertex3f(100.0f, 0.0f, 0.0f);
+
+    // Eixo Y - Verde
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glVertex3f(0.0f, -100.0f, 0.0f);
+    glVertex3f(0.0f, 100.0f, 0.0f);
+
+    // Eixo Z - Azul
+    glColor3f(0.0f, 0.0f, 1.0f);
+    glVertex3f(0.0f, 0.0f, -100.0f);
+    glVertex3f(0.0f, 0.0f, 100.0f);
+    glEnd();
+
+    // 2. Desenhar a Geometria Carregada
+    glColor3f(1.0f, 1.0f, 1.0f); // Branco (como nas imagens de teste)
+
+    glBegin(GL_TRIANGLES);
+    // Iteramos de 3 em 3 porque cada vértice tem (X, Y, Z)
+    for (size_t i = 0; i < allVertices.size(); i += 3) {
+        glVertex3f(allVertices[i], allVertices[i + 1], allVertices[i + 2]);
+    }
+    glEnd();
+
+    glutSwapBuffers();
 }
 
+int main(int argc, char** argv) {
+    // 1. Validar Argumentos
+    if (argc < 2) {
+        cout << "# => ERRO: Ficheiro XML nao fornecido!" << endl;
+        cout << "# => Uso: engine <ficheiro.xml>" << endl;
+        return 1;
+    }
 
+    // 2. Leitura (única) dos dados de Configuração
+    cout << "--- A INICIAR MOTOR 3D ---" << endl;
+    loadConfig(argv[1]);
 
-int main(int argc, char* argv[]) {
-	if (argc < 2) {
-		cout << "# => Erro: Faltam argumentos" << endl;
-		cout << "# => Uso: generator <forma> [parametros] <ficheiro_saida.3d" << endl;
-		return 1;
-	}
+    // 3. Inicializar o GLUT
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+    glutInitWindowPosition(100, 100);
 
-	string shape = argv[1];
+    // Usar os valores de janela lidos do XML
+    glutInitWindowSize(winW, winH);
+    glutCreateWindow("Motor 3D - CG Fase 1");
 
-	if (shape == "plane") {
-		if (argc != 5) {
-			cout << "# => Erro: generator plane <tamanho> <divisoes> <ficheiro.3d" << endl;
-			return 1;
-		}
-		float size = stof(argv[2]);
-		int divisions = stoi(argv[3]);
-		string filename = argv[4];
+    // 4. Registar Callbacks
+    glutDisplayFunc(renderScene);
+    glutReshapeFunc(changeSize);
 
-		generatePlane(size, divisions, filename);
-	}
-	else if (shape == "box") {
-		if (argc != 5) {
-			cout << "# => Erro: generator box <dimensao> <divisoes> <ficheiro.3d" << endl;
-			return 1;
-		}
-		float dimension = stof(argv[2]);
-		int divisions = stoi(argv[3]);
-		string filename = argv[4];
+    // 5. Configurações OpenGL
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 
-		generateBox(dimension, divisions, filename);
-	}
-	else if (shape == "sphere") {
-		if (argc != 6) {
-			cout << "# => Erro: generator sphere <raio> <slices> <stacks> <ficheiro.3d" << endl;
-			return 1;
-		}
-		float radius = stof(argv[2]);
-		int slices = stoi(argv[3]);
-		int stacks = stoi(argv[4]);
-		string filename = argv[5];
+    // Wireframe obrigatório para a Fase 1 (tal como nas imagens dos testes)
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		generateSphere(radius, slices, stacks, filename);
-	}
-	else if (shape == "cone") {
-		if (argc != 7) {
-			cout << "# => Erro: generator cone <raio_base> <altura> <slices> <stacks> <ficheiro.3d" << endl;
-			return 1;
-		}
-		float radius = stof(argv[2]);
-		float height = stof(argv[3]);
-		int slices = stoi(argv[4]);
-		int stacks = stoi(argv[5]);
-		string filename = argv[6];
+    // 6. Arrancar ciclo principal
+    glutMainLoop();
 
-		generateCone(radius, height, slices, stacks, filename);
-	}
-	else {
-		cout << "# => Erro: Forma geometrica desconhecida ('" << shape << "')." << endl;
-		return 1;
-	}
-
-	return 0;
+    return 0;
 }
