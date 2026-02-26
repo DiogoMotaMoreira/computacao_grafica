@@ -138,13 +138,13 @@ void generatePlane(float size, int divisions, const string& filename) {
 			// Plano XZ 
 			// Triângulo 1 
 			file << x1 << " 0 " << z1 << "\n";
-			file << x2 << " 0 " << z2 << "\n";
 			file << x1 << " 0 " << z2 << "\n";
+			file << x2 << " 0 " << z2 << "\n";
 
 			// Triângulo 2 
 			file << x1 << " 0 " << z1 << "\n";
-			file << x2 << " 0 " << z1 << "\n";
 			file << x2 << " 0 " << z2 << "\n";
+			file << x2 << " 0 " << z1 << "\n";
 		}
 	}
 
@@ -232,8 +232,8 @@ void generateCone(float radius, float height, int slices, int stacks, const stri
 
 		file << "0.0 0.0 0.0\n";
 
-		file << (radius * cos(angle2)) << " 0.0 " << (radius * sin(angle2)) << "\n";
-		file << (radius * cos(angle1)) << " 0.0 " << (radius * sin(angle1)) << "\n";
+		file << (radius * sin(angle2)) << " 0.0 " << (radius * cos(angle2)) << "\n";
+		file << (radius * sin(angle1)) << " 0.0 " << (radius * cos(angle1)) << "\n";
 	}
 
 	// topo
@@ -248,10 +248,10 @@ void generateCone(float radius, float height, int slices, int stacks, const stri
 			float angle1 = j * angleStep;
 			float angle2 = (j + 1) * angleStep;
 
-			float x1 = r1 * cos(angle1); float z1 = r1 * sin(angle1); // Baixo Esquerda
-			float x2 = r1 * cos(angle2); float z2 = r1 * sin(angle2); // Baixo Direita
-			float x3 = r2 * cos(angle1); float z3 = r2 * sin(angle1); // Cima Esquerda
-			float x4 = r2 * cos(angle2); float z4 = r2 * sin(angle2); // Cima Direita
+			float x1 = r1 * sin(angle1); float z1 = r1 * cos(angle1); // Baixo Esquerda
+			float x2 = r1 * sin(angle2); float z2 = r1 * cos(angle2); // Baixo Direita
+			float x3 = r2 * sin(angle1); float z3 = r2 * cos(angle1); // Cima Esquerda
+			float x4 = r2 * sin(angle2); float z4 = r2 * cos(angle2); // Cima Direita
 
 			file << x1 << " " << h1 << " " << z1 << "\n";
 			file << x2 << " " << h1 << " " << z2 << "\n";
