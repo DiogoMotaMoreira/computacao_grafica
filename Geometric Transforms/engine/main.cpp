@@ -1,3 +1,31 @@
+
+
+// ==========================================
+//        NOTAS A LER PARA A FASE 2:
+// ==========================================
+// Problemas a resolver
+// ==========================================
+// problema do allvertices => aqui metemos todos os vertices das figuras
+//      - quando chega a hora de desenhar (renderScene), o OpenGL desenha esses vertices todos de uma vez na origem (0,0,0)
+//      - na fase 2 temos que aplicar transformações... 
+//      - se todos os vertices tiverem misturados no mesmo vector, não conseguimos mover a esfera sem mover o cone ao mesmo tempo (isto quando temos 2 figuras em allvertices)
+// ==========================================
+// coisas a mudar para a fase 2
+// ==========================================
+// - mudar a memória 
+//      - precisamos definir c++ structs ou classes que representem um GRUPO
+//      - o GRUPO precisa guardar as transformações, os nomes dos modeles, uma lista de GRUPOS filhos (subgrupos)
+// - mudar o carregamento de ficheiros
+//      - se tivermos 8 planetas a usar o fihceiro sphere.3d, não devemos ler 8x o mesmo ficheiro
+//      - podemos usar dicionário (std :: map<string, vector<floar>>) para carregar cada ficheiro .3d apenas uma vez (uma mini cache)
+// - mudar para o Parser XML (recursividade)
+//      - na fase 1 temos um <group> -> <models> -> <model>  |  isto é um caminho fixo
+//      - nesta fase podemos ter grupos dentro de grupos por isso temos de criar uma função de leitura recursiva no tinyxml2 para que ele consiga navegar na árvore
+// ==========================================
+
+
+
+
 #include <iostream>
 #include <stdlib.h>
 #include <fstream>
@@ -15,12 +43,26 @@
 using namespace std;
 using namespace tinyxml2;
 
+
 // ==========================================
-// ESTRUTURAS DE DADOS (Memória RAM)
+// ESTRUTURAS DE DADOS -> fase2
 // ==========================================
-// O nosso vetor global que guardará todos os vértices lidos dos ficheiros .3d
-// Formato: [X1, Y1, Z1, X2, Y2, Z2, ...]
-vector<float> allVertices;
+
+struct Transform {
+    string type;
+    float x, y, z;
+    float angle;
+};
+
+struct Group {
+    vector<Transform> transforms;
+    vector<string> modelFiles;
+    vector<Group> children;
+};
+
+Group sceneRoot;
+
+map<string, vector<float>> modelsData;
 
 // ==========================================
 // VARIÁVEIS GLOBAIS (Câmara e Janela)
@@ -34,9 +76,15 @@ float upX = 0.0f, upY = 1.0f, upZ = 0.0f;
 float projFov = 60.0f, projNear = 1.0f, projFar = 1000.0f;
 
 // ==========================================
-// LEITURA DOS FICHEIROS .3D
+// LEITURA DOS FICHEIROS .3D  -> fase2
 // ==========================================
 void load3DFile(const string& filename) {
+
+    // se o ficheiro ja foi lido não vamos carregar de novo
+    if (modelsData.cout(filename) > 0) {
+        return;
+    }
+
     ifstream file(filename);
     if (!file.is_open()) {
         cout << "# => ERRO: Nao foi possivel abrir o ficheiro 3D: " << filename << endl;
@@ -49,21 +97,81 @@ void load3DFile(const string& filename) {
         return;
     }
 
+    // vetor temporário so para vertices deste modelo
+    vector<float> currentModelVertices;
     float x, y, z;
+
+
     // Ler os N vértices e adicionar ao nosso vetor global em memória
     for (int i = 0; i < numVertices; ++i) {
         file >> x >> y >> z;
-        allVertices.push_back(x);
-        allVertices.push_back(y);
-        allVertices.push_back(z);
+        currentModelVertices.push_back(x);
+        currentModelVertices.push_back(y);
+        currentModelVertices.push_back(z);
     }
 
     file.close();
+    modelsData[filename] = currentModelVertices;
     cout << "i => Carregado ficheiro: " << filename << " (" << numVertices << " vertices)" << endl;
 }
 
 // ==========================================
-// LEITURA DO XML (TinyXML-2)
+// parser recursivo - fase2
+// ==========================================
+Group parseGroup(XMLElement* groupElement) {
+    Group node;
+
+    // ler transformações
+    XMLElement* transformElement = group->FirstChildElement("transform"); // procura o primeiro filho transform na arvore
+    if (transformElement) {
+        // ler todos os elementos dentro do transform
+        for (XMLElement* t = transformElement->FirstChildElement(); t != nullptr; t = t->NextSiblingElement()) {
+            Transform trans;
+            trans.type = t->Name(); // guardar se é translate, rotate, ...
+
+            trans.x = t->FloatAttribute("x", 0.0f);
+            trans.y = t->FloatAttribute("y", 0.0f);
+            trans.z = t->FloatAttribute("z", 0.0f);
+
+            if (trans.type == "rotate") {
+                trans.angle = t->FloatAttribute("angle", 0.0f);
+            }
+            else {
+                trans.angle = 0.0f;
+            }
+
+            node.transforms.push_back(trans);
+        }
+    }
+
+    // ler os modelos .3d
+    XMLElement* modelsElement = groupElement->FirstChildElement("models");
+    if (modelsElement) {
+        for (XMLElement* m = modelsElement->FirstChildElement("model"); m != nullptr; m = m->NextSiblingElement("model")) {
+            const char* fileAttr = m->Attribute("file");
+            if (fileAttr) {
+                string filename = fileAttr;
+                node.modelFiles.push_back(filename);
+                load3DFile(filename);
+            }
+        }
+    }
+
+    // ler subgrupos
+    for (XMLElement* childGroup = groupElement->FirstChildElement("group"); childGroup != nullptr ; childGroup = childGroup->NextSiblingElement("group")) {
+        // chamar função para ler filho (recursividade)
+        Group childNode = parseGroup(childGroup);
+        // guardar o resultado na lista dos filhos
+        node.children.push_back(childNode);
+    }
+
+    return node;
+}
+
+
+
+// ==========================================
+// LEITURA DO XML (TinyXML-2) - fase 2
 // ==========================================
 void loadConfig(const char* xmlFilename) {
     XMLDocument doc;
@@ -118,21 +226,60 @@ void loadConfig(const char* xmlFilename) {
         }
     }
 
-    // 3. Ler Modelos
-    XMLElement* group = world->FirstChildElement("group");
-    if (group) {
-        XMLElement* models = group->FirstChildElement("models");
-        if (models) {
-            // Ciclo para iterar sobre TODOS os <model> dentro de <models>
-            for (XMLElement* mod = models->FirstChildElement("model"); mod != nullptr; mod = mod->NextSiblingElement("model")) {
-                const char* fileAttr = mod->Attribute("file");
-                if (fileAttr) {
-                    load3DFile(fileAttr);
-                }
-            }
-        }
+    // 3. Ler Modelos - fase 2
+    XMLElement* mainGroup = world->FirstChildElement("group");
+    if (mainGroup) {
+        // sceneRoot é a nossa var global do tipo group
+        sceneRoot = parseGroup(mainGroup);
+        cout << "i => Arvore de cena carregada com sucesso!" << endl;
+    }
+    else {
+        cout << "i => AVISO: Nenhum <group> principal encontrado no XML" << endl;
     }
 }
+
+// ==========================================
+// DESENHO RECURSIVO DA ÁRVORE - fase 2
+// ==========================================
+void drawGroup(const Group& group) {
+    // guardar o estado atual do mundo 
+    glPushMatrix();
+
+    // aplicar as transformações deste grupo
+    for (const Transform& t : group.transforms) {
+        if (t.type == "translate") {
+            glTranslatef(t.x, t.y, t.z);
+        }
+        else if (t.type == "rotate") {
+            glRotatef(t.angle, t.x, t.y, t.z);
+        }
+        else if (t.type == "scale") {
+            glScalef(t.x, t.y, t.z)
+        }
+    }
+
+    // desenhar os modelos pertencentes a este grupo
+    for (const string& modelName : group.modelFiles) {
+        if (modelsData.count(filename) > 0) {
+            const vector<float>& vertices = modelsData[modelName];
+
+            glBegin(GL_TRIANGLES);
+            for (size_t i = 0; i < vertices.size(); i += 3) {
+                glVertex3f(vertices[i], vertices[i + 1], vertices[i + 2]);
+            }
+            glEnd();
+        }
+    }
+
+    // desenhar os subgrupos (filhos)
+    for (const Group& child : group.children) {
+        drawGroup(child);
+    }
+
+    glPopMatrix(); // isto serve para garantir que quando formos desenhar o proximo grupo, ele não herdar as tranformações deste
+}
+
+
 
 // ==========================================
 // FUNÇÕES GLUT
@@ -151,6 +298,7 @@ void changeSize(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
+// fase 2
 void renderScene(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -182,12 +330,7 @@ void renderScene(void) {
     // 2. Desenhar a Geometria Carregada
     glColor3f(1.0f, 1.0f, 1.0f); // Branco
 
-    glBegin(GL_TRIANGLES);
-    // Iteramos de 3 em 3 porque cada vértice tem (X, Y, Z)
-    for (size_t i = 0; i < allVertices.size(); i += 3) {
-        glVertex3f(allVertices[i], allVertices[i + 1], allVertices[i + 2]);
-    }
-    glEnd();
+    drawGroup(sceneRoot);
 
     glutSwapBuffers();
 }
