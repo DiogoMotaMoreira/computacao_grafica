@@ -8,7 +8,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # -------------------------------------------------------------------
 # 1. DEFINIR AS DUAS APLICAÇÕES
 # -------------------------------------------------------------------
-add_executable(generator generator/main.cpp)
+add_executable(generator engine/main.cpp)
 add_executable(engine engine/main.cpp engine/tinyxml2.cpp)
 
 # -------------------------------------------------------------------

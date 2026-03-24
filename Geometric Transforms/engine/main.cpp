@@ -31,6 +31,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <map>
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -81,7 +82,7 @@ float projFov = 60.0f, projNear = 1.0f, projFar = 1000.0f;
 void load3DFile(const string& filename) {
 
     // se o ficheiro ja foi lido não vamos carregar de novo
-    if (modelsData.cout(filename) > 0) {
+    if (modelsData.count(filename) > 0) {
         return;
     }
 
@@ -122,7 +123,7 @@ Group parseGroup(XMLElement* groupElement) {
     Group node;
 
     // ler transformações
-    XMLElement* transformElement = group->FirstChildElement("transform"); // procura o primeiro filho transform na arvore
+    XMLElement* transformElement = groupElement->FirstChildElement("transform"); // procura o primeiro filho transform na arvore
     if (transformElement) {
         // ler todos os elementos dentro do transform
         for (XMLElement* t = transformElement->FirstChildElement(); t != nullptr; t = t->NextSiblingElement()) {
@@ -254,13 +255,13 @@ void drawGroup(const Group& group) {
             glRotatef(t.angle, t.x, t.y, t.z);
         }
         else if (t.type == "scale") {
-            glScalef(t.x, t.y, t.z)
+            glScalef(t.x, t.y, t.z);
         }
     }
 
     // desenhar os modelos pertencentes a este grupo
     for (const string& modelName : group.modelFiles) {
-        if (modelsData.count(filename) > 0) {
+        if (modelsData.count(modelName) > 0) {
             const vector<float>& vertices = modelsData[modelName];
 
             glBegin(GL_TRIANGLES);
@@ -344,7 +345,7 @@ int main(int argc, char** argv) {
     }
 
     // 2. Leitura (única) dos dados de Configuração
-    cout << "--- A INICIAR MOTOR 3D ---" << endl;
+         cout << "--- A INICIAR MOTOR 3D ---" << endl;
     loadConfig(argv[1]);
 
     // 3. Inicializar o GLUT
