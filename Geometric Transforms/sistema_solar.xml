@@ -1,0 +1,199 @@
+<world>
+    <window width="800" height="800" />
+    <camera> 
+        <position x="60" y="50" z="80" />
+        <lookAt x="0" y="0" z="0" />
+        <up x="0" y="1" z="0" />
+        <projection fov="60" near="1" far="1000" />
+    </camera>
+
+    <group>
+        <group>
+            <transform>
+                <scale x="6" y="6" z="6" />
+            </transform>
+            <models>
+                <model file="esfera.3d" />
+            </models>
+        </group>
+
+        <group>
+            <transform>
+                <rotate angle="25" x="0" y="1" z="0" />
+                <translate x="10" y="0" z="0" />
+            </transform>
+            <group>
+                <transform><scale x="0.5" y="0.5" z="0.5" /></transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+        </group>
+
+        <group>
+            <transform>
+                <rotate angle="140" x="0" y="1" z="0" />
+                <translate x="14" y="0" z="0" />
+            </transform>
+            <group>
+                <transform><scale x="0.9" y="0.9" z="0.9" /></transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+        </group>
+
+        <group>
+            <transform>
+                <rotate angle="210" x="0" y="1" z="0" />
+                <translate x="19" y="0" z="0" />
+            </transform>
+            <group>
+                <transform><scale x="1.0" y="1.0" z="1.0" /></transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="45" x="0" y="1" z="0" />
+                    <translate x="2.0" y="0" z="0" />
+                    <scale x="0.3" y="0.3" z="0.3" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+        </group>
+
+        <group>
+            <transform>
+                <rotate angle="310" x="0" y="1" z="0" />
+                <translate x="25" y="0" z="0" />
+            </transform>
+            <group>
+                <transform><scale x="0.7" y="0.7" z="0.7" /></transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="90" x="0" y="1" z="0" />
+                    <translate x="1.5" y="0" z="0" />
+                    <scale x="0.15" y="0.15" z="0.15" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="200" x="0" y="1" z="0" />
+                    <translate x="2.2" y="0" z="0" />
+                    <scale x="0.1" y="0.1" z="0.1" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+        </group>
+
+        <group>
+            <transform>
+                <rotate angle="50" x="0" y="1" z="0" />
+                <translate x="35" y="0" z="0" />
+            </transform>
+            <group>
+                <transform><scale x="2.5" y="2.5" z="2.5" /></transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="30" x="0" y="1" z="0" />
+                    <translate x="3.5" y="0" z="0" />
+                    <scale x="0.2" y="0.2" z="0.2" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="120" x="0" y="1" z="0" />
+                    <translate x="4.5" y="0" z="0" />
+                    <scale x="0.18" y="0.18" z="0.18" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="210" x="0" y="1" z="0" />
+                    <translate x="5.5" y="0" z="0" />
+                    <scale x="0.3" y="0.3" z="0.3" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="300" x="0" y="1" z="0" />
+                    <translate x="6.8" y="0" z="0" />
+                    <scale x="0.25" y="0.25" z="0.25" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+        </group>
+
+        <group>
+            <transform>
+                <rotate angle="180" x="0" y="1" z="0" />
+                <translate x="48" y="0" z="0" />
+            </transform>
+            <group>
+                <transform><scale x="2.0" y="2.0" z="2.0" /></transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform><scale x="4.0" y="0.02" z="4.0" /></transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="75" x="0" y="1" z="0" />
+                    <translate x="5.5" y="0" z="0" />
+                    <scale x="0.35" y="0.35" z="0.35" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+        </group>
+
+        <group>
+            <transform>
+                <rotate angle="260" x="0" y="1" z="0" />
+                <translate x="59" y="0" z="0" />
+            </transform>
+            <group>
+                <transform><scale x="1.5" y="1.5" z="1.5" /></transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="90" x="0" y="0" z="1" />
+                    <scale x="2.5" y="0.02" z="2.5" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="10" x="0" y="1" z="0" />
+                    <translate x="3.0" y="0" z="0" />
+                    <scale x="0.2" y="0.2" z="0.2" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+        </group>
+
+        <group>
+            <transform>
+                <rotate angle="90" x="0" y="1" z="0" />
+                <translate x="68" y="0" z="0" />
+            </transform>
+            <group>
+                <transform><scale x="1.4" y="1.4" z="1.4" /></transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+            <group>
+                <transform>
+                    <rotate angle="180" x="0" y="1" z="0" />
+                    <translate x="2.5" y="0" z="0" />
+                    <scale x="0.2" y="0.2" z="0.2" />
+                </transform>
+                <models><model file="esfera.3d" /></models>
+            </group>
+        </group>
+    </group>
+</world>
