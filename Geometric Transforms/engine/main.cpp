@@ -66,6 +66,15 @@ struct Group {
     vector<Group> children;
 };
 
+struct Target {
+    string name;
+    float x, y, z;
+    float radius;
+};
+
+std::vector<Target> cameraTargets;
+int currentTargetIndex = 0;        // Número do astro 
+
 Group sceneRoot;
 
 map<string, vector<float>> modelsData;
@@ -241,6 +250,22 @@ void loadConfig(const char* xmlFilename) {
         }
     }
 
+    if (camera) {
+        XMLElement* waypointsElem = camera->FirstChildElement("waypoints");
+        if (waypointsElem) {
+            for (XMLElement* target = waypointsElem->FirstChildElement("target"); target != nullptr; target = target->NextSiblingElement("target")) {
+                Target t;
+                t.name = target->Attribute("name");
+                t.x = target->FloatAttribute("x");
+                t.y = target->FloatAttribute("y");
+                t.z = target->FloatAttribute("z");
+                t.radius = 1.0f; // Se falhar, fica a 1.0
+                target->QueryFloatAttribute("radius", &t.radius);
+                cameraTargets.push_back(t);
+            }
+        }
+    }
+
     // 3. Ler Modelos - fase 2
     XMLElement* mainGroup = world->FirstChildElement("group");
     if (mainGroup) {
@@ -324,6 +349,53 @@ void initCamera() {
 
     camBeta = asin(dy / camRadius);
     camAlpha = atan2(dx, dz);
+
+    // Forçar o zoom dinâmico no arranque
+    if (!cameraTargets.empty()) {
+        Target alvo = cameraTargets[0]; // O índice 0 é o Sol
+
+        // Centrar no Sol
+        lookAtX = alvo.x;
+        lookAtY = alvo.y;
+        lookAtZ = alvo.z;
+
+        // Aplicar a nossa Regra de 3 para o Zoom
+        camRadius = alvo.radius * 10.0f;
+        if (camRadius < 0.5f) camRadius = 0.5f;
+
+        updateCameraPos();
+    }
+}
+
+void processSpecialKeys(int key, int xx, int yy) {
+    if (cameraTargets.empty()) return;
+
+    if (key == GLUT_KEY_RIGHT) {
+        currentTargetIndex = (currentTargetIndex + 1) % cameraTargets.size();
+    }
+    else if (key == GLUT_KEY_LEFT) {
+        currentTargetIndex = (currentTargetIndex - 1 + cameraTargets.size()) % cameraTargets.size();
+    }
+
+    Target alvo = cameraTargets[currentTargetIndex];
+    cout << "A focar em: " << alvo.name << " (Raio lido: " << alvo.radius << ")" << endl;
+
+    // 1. O centro da nossa rotação passa a ser o planeta!
+    lookAtX = alvo.x;
+    lookAtY = alvo.y;
+    lookAtZ = alvo.z;
+
+    // 2. A Magia da Proporcionalidade: 
+    // A distância da câmara será 10 vezes o tamanho do astro.
+    camRadius = alvo.radius * 10.0f;
+
+    // As luas de Marte são muito muito pequenas. Impomos uma distância mínima absoluta 
+    // para não entrarmos dentro da geometria do modelo:
+    if (camRadius < 0.5f) camRadius = 0.5f;
+
+    // 3. Atualizamos a câmara para refletir esta nova âncora e zoom
+    updateCameraPos();
+    glutPostRedisplay();
 }
 
 void processMouseButtons(int button, int state, int xx, int yy) {
@@ -360,7 +432,7 @@ void processMouseMotion(int xx, int yy) {
     }
     else if (tracking == 2) { // Botão Direito: Zoom
         camRadius += deltaY * 0.1f;
-        if (camRadius < 1.0f) camRadius = 1.0f;
+        if (camRadius < 0.1f) camRadius = 0.1f;
     }
 
     startX = xx;
@@ -393,10 +465,11 @@ void renderScene(void) {
 
     glLoadIdentity();
 
-    // Configurar câmara dinâmica
+
     gluLookAt(camPosX, camPosY, camPosZ,
         lookAtX, lookAtY, lookAtZ,
         upX, upY, upZ);
+    
 
     // 1. Desenhar Eixos
     glBegin(GL_LINES);
@@ -432,26 +505,32 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // 2. Leitura (única) dos dados de Configuração
-         cout << "--- A INICIAR MOTOR 3D ---" << endl;
-    loadConfig(argv[1]);
-    
-    initCamera();
-
-    // 3. Inicializar o GLUT
+    // 2. Inicializar o GLUT e a Janela PRIMEIRO
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(100, 100);
-
     glutInitWindowSize(winW, winH);
-    glutCreateWindow("Motor 3D - CG Fase 1");
+    glutCreateWindow("Motor 3D - Sistema Solar");
 
-    // 4. Registar Callbacks
+    // 3. Leitura dos dados de Configuração (O XML)
+    cout << "--- A INICIAR MOTOR 3D ---" << endl;
+    loadConfig(argv[1]);
+
+    // Atualiza o tamanho da janela caso o XML tenha alterado os defaults
+    glutReshapeWindow(winW, winH);
+
+    initCamera();
+
+    // 4. Registar Callbacks (AGORA o GLUT já tem uma janela para os associar)
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);
 
+    // Callbacks do Rato
     glutMouseFunc(processMouseButtons);
     glutMotionFunc(processMouseMotion);
+
+    // Callbacks do Teclado Especial (Setas, F1-F12)
+    glutSpecialFunc(processSpecialKeys);
 
     // 5. Configurações OpenGL
     glEnable(GL_DEPTH_TEST);
