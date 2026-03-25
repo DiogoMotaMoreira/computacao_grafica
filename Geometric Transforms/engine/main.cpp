@@ -55,9 +55,14 @@ struct Transform {
     float angle;
 };
 
+struct ModelInfo {
+    string filename;
+    string type;
+};
+
 struct Group {
     vector<Transform> transforms;
-    vector<string> modelFiles;
+    vector<ModelInfo> models;
     vector<Group> children;
 };
 
@@ -76,6 +81,8 @@ float lookAtX = 0.0f, lookAtY = 0.0f, lookAtZ = 0.0f;
 float upX = 0.0f, upY = 1.0f, upZ = 0.0f;
 float projFov = 60.0f, projNear = 1.0f, projFar = 1000.0f;
 
+float camAlpha = 0.0f, camBeta = 0.5f, camRadius = 50.0f;
+int startX, startY, tracking = 0;
 // ==========================================
 // LEITURA DOS FICHEIROS .3D  -> fase2
 // ==========================================
@@ -146,14 +153,21 @@ Group parseGroup(XMLElement* groupElement) {
     }
 
     // ler os modelos .3d
+    // ler os modelos .3d
     XMLElement* modelsElement = groupElement->FirstChildElement("models");
     if (modelsElement) {
         for (XMLElement* m = modelsElement->FirstChildElement("model"); m != nullptr; m = m->NextSiblingElement("model")) {
             const char* fileAttr = m->Attribute("file");
+            const char* typeAttr = m->Attribute("type");
+
             if (fileAttr) {
-                string filename = fileAttr;
-                node.modelFiles.push_back(filename);
-                load3DFile(filename);
+                ModelInfo info;
+                info.filename = fileAttr;
+                // Se o atributo type existir no XML, guarda-o. Se não, assume que é "solid"
+                info.type = (typeAttr != nullptr) ? typeAttr : "solid";
+
+                node.models.push_back(info);
+                load3DFile(info.filename);
             }
         }
     }
@@ -260,11 +274,20 @@ void drawGroup(const Group& group) {
     }
 
     // desenhar os modelos pertencentes a este grupo
-    for (const string& modelName : group.modelFiles) {
-        if (modelsData.count(modelName) > 0) {
-            const vector<float>& vertices = modelsData[modelName];
+    for (const ModelInfo& mod : group.models) {
+        if (modelsData.count(mod.filename) > 0) {
+            const vector<float>& vertices = modelsData[mod.filename];
 
-            glBegin(GL_TRIANGLES);
+            // VERIFICA O TIPO PARA DECIDIR COMO DESENHAR
+            if (mod.type == "line") {
+                glBegin(GL_LINE_LOOP); // Desenha a ligar os pontos em anel
+                glColor3f(0.3f, 0.3f, 0.3f); // Pinta a órbita de cinzento
+            }
+            else {
+                glBegin(GL_TRIANGLES); // Desenho normal
+                glColor3f(1.0f, 1.0f, 1.0f); // Pinta o planeta de branco
+            }
+
             for (size_t i = 0; i < vertices.size(); i += 3) {
                 glVertex3f(vertices[i], vertices[i + 1], vertices[i + 2]);
             }
@@ -280,7 +303,72 @@ void drawGroup(const Group& group) {
     glPopMatrix(); // isto serve para garantir que quando formos desenhar o proximo grupo, ele não herdar as tranformações deste
 }
 
+// ==========================================
+// CONTROLO DA CÂMARA ORBITAL
+// ==========================================
+void updateCameraPos() {
+    // Calcular o X, Y, Z com base nos ângulos (alpha, beta) e no raio
+    camPosX = lookAtX + camRadius * cos(camBeta) * sin(camAlpha);
+    camPosY = lookAtY + camRadius * sin(camBeta);
+    camPosZ = lookAtZ + camRadius * cos(camBeta) * cos(camAlpha);
+}
 
+void initCamera() {
+    // Converter o XYZ lido do XML para coordenadas esféricas iniciais
+    float dx = camPosX - lookAtX;
+    float dy = camPosY - lookAtY;
+    float dz = camPosZ - lookAtZ;
+
+    camRadius = sqrt(dx * dx + dy * dy + dz * dz);
+    if (camRadius == 0) camRadius = 1.0f; // Prevenir divisão por zero
+
+    camBeta = asin(dy / camRadius);
+    camAlpha = atan2(dx, dz);
+}
+
+void processMouseButtons(int button, int state, int xx, int yy) {
+    if (state == GLUT_DOWN) {
+        startX = xx;
+        startY = yy;
+        if (button == GLUT_LEFT_BUTTON) {
+            tracking = 1; // Rotação (Orbit)
+        }
+        else if (button == GLUT_RIGHT_BUTTON) {
+            tracking = 2; // Zoom
+        }
+        else {
+            tracking = 0;
+        }
+    }
+    else if (state == GLUT_UP) {
+        tracking = 0;
+    }
+}
+
+void processMouseMotion(int xx, int yy) {
+    if (!tracking) return;
+
+    int deltaX = xx - startX;
+    int deltaY = yy - startY;
+
+    if (tracking == 1) { // Botão Esquerdo: Rodar
+        camAlpha -= deltaX * 0.01f;
+        camBeta += deltaY * 0.01f;
+
+        if (camBeta > 1.5f) camBeta = 1.5f;
+        else if (camBeta < -1.5f) camBeta = -1.5f;
+    }
+    else if (tracking == 2) { // Botão Direito: Zoom
+        camRadius += deltaY * 0.1f;
+        if (camRadius < 1.0f) camRadius = 1.0f;
+    }
+
+    startX = xx;
+    startY = yy;
+
+    updateCameraPos();
+    glutPostRedisplay();
+}
 
 // ==========================================
 // FUNÇÕES GLUT
@@ -347,6 +435,8 @@ int main(int argc, char** argv) {
     // 2. Leitura (única) dos dados de Configuração
          cout << "--- A INICIAR MOTOR 3D ---" << endl;
     loadConfig(argv[1]);
+    
+    initCamera();
 
     // 3. Inicializar o GLUT
     glutInit(&argc, argv);
@@ -359,6 +449,9 @@ int main(int argc, char** argv) {
     // 4. Registar Callbacks
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);
+
+    glutMouseFunc(processMouseButtons);
+    glutMotionFunc(processMouseMotion);
 
     // 5. Configurações OpenGL
     glEnable(GL_DEPTH_TEST);

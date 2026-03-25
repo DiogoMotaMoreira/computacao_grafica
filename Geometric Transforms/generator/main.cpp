@@ -267,6 +267,95 @@ void generateCone(float radius, float height, int slices, int stacks, const stri
 
 }
 
+void generateTorus(float innerRadius, float outerRadius, int sides, int rings, const string& filename) {
+	ofstream file(filename);
+	if (!file.is_open()) {
+		cout << "# => Erro ao abrir ficheiro!" << endl;
+		return;
+	}
+
+	// rings (voltas do anel principal) * sides (faces do tubo) * 2 triângulos * 3 vértices
+	int numVertices = rings * sides * 6;
+	file << numVertices << "\n";
+
+	float ringStep = (2.0f * M_PI) / rings;
+	float sideStep = (2.0f * M_PI) / sides;
+
+	for (int i = 0; i < rings; ++i) {
+		float theta1 = i * ringStep;
+		float theta2 = (i + 1) * ringStep;
+
+		for (int j = 0; j < sides; ++j) {
+			float phi1 = j * sideStep;
+			float phi2 = (j + 1) * sideStep;
+
+			// ==========================================
+			// Calcular os 4 cantos da "face" atual
+			// x = (R + r * cos(phi)) * cos(theta)
+			// y = r * sin(phi)
+			// z = (R + r * cos(phi)) * sin(theta)
+			// ==========================================
+
+			// Vértice 1: (theta1, phi1) - Canto Inferior Esquerdo
+			float x1 = (outerRadius + innerRadius * cos(phi1)) * cos(theta1);
+			float y1 = innerRadius * sin(phi1);
+			float z1 = (outerRadius + innerRadius * cos(phi1)) * sin(theta1);
+
+			// Vértice 2: (theta2, phi1) - Canto Inferior Direito
+			float x2 = (outerRadius + innerRadius * cos(phi1)) * cos(theta2);
+			float y2 = innerRadius * sin(phi1);
+			float z2 = (outerRadius + innerRadius * cos(phi1)) * sin(theta2);
+
+			// Vértice 3: (theta2, phi2) - Canto Superior Direito
+			float x3 = (outerRadius + innerRadius * cos(phi2)) * cos(theta2);
+			float y3 = innerRadius * sin(phi2);
+			float z3 = (outerRadius + innerRadius * cos(phi2)) * sin(theta2);
+
+			// Vértice 4: (theta1, phi2) - Canto Superior Esquerdo
+			float x4 = (outerRadius + innerRadius * cos(phi2)) * cos(theta1);
+			float y4 = innerRadius * sin(phi2);
+			float z4 = (outerRadius + innerRadius * cos(phi2)) * sin(theta1);
+
+			// Escrever Triângulo 1 (v1, v2, v3)
+			file << x1 << " " << y1 << " " << z1 << "\n";
+			file << x2 << " " << y2 << " " << z2 << "\n";
+			file << x3 << " " << y3 << " " << z3 << "\n";
+
+			// Escrever Triângulo 2 (v1, v3, v4)
+			file << x1 << " " << y1 << " " << z1 << "\n";
+			file << x3 << " " << y3 << " " << z3 << "\n";
+			file << x4 << " " << y4 << " " << z4 << "\n";
+		}
+	}
+
+	file.close();
+	cout << "i => Torus gerado com sucesso! " << numVertices << " vertices gravados em: " << filename << endl;
+}
+
+void generateOrbit(float radius, int slices, const string& filename) {
+	ofstream file(filename);
+	if (!file.is_open()) {
+		cout << "# => Erro ao abrir ficheiro!" << endl;
+		return;
+	}
+
+	// Numa órbita (linha), o número de vértices é exatamente igual ao número de slices
+	file << slices << "\n";
+
+	float step = (2.0f * M_PI) / slices;
+
+	// Gerar apenas os pontos da circunferência no plano XZ
+	for (int i = 0; i < slices; ++i) {
+		float angle = i * step;
+		float x = radius * sin(angle);
+		float z = radius * cos(angle);
+
+		file << x << " 0.0 " << z << "\n";
+	}
+
+	file.close();
+	cout << "i => Orbita gerada com sucesso! " << slices << " vertices gravados em: " << filename << endl;
+}
 
 
 int main(int argc, char* argv[]) {
@@ -324,6 +413,30 @@ int main(int argc, char* argv[]) {
 		string filename = argv[6];
 
 		generateCone(radius, height, slices, stacks, filename);
+	}
+	else if (shape == "torus") {
+		if (argc != 7) {
+			cout << "# => Erro: generator torus <raio_interno> <raio_externo> <lados> <aneis> <ficheiro.3d>" << endl;
+			return 1;
+		}
+		float innerRadius = stof(argv[2]);
+		float outerRadius = stof(argv[3]);
+		int sides = stoi(argv[4]);
+		int rings = stoi(argv[5]);
+		string filename = argv[6];
+
+		generateTorus(innerRadius, outerRadius, sides, rings, filename);
+	}
+	else if (shape == "orbit") {
+		if (argc != 5) {
+			cout << "# => Erro: generator orbit <raio> <slices> <ficheiro.3d>" << endl;
+			return 1;
+		}
+		float radius = stof(argv[2]);
+		int slices = stoi(argv[3]);
+		string filename = argv[4];
+
+		generateOrbit(radius, slices, filename);
 	}
 	else {
 		cout << "# => Erro: Forma geometrica desconhecida ('" << shape << "')." << endl;
