@@ -1,0 +1,234 @@
+<world>
+    <window width="1024" height="768" />
+    <camera> 
+        <position x="0" y="60" z="100" />
+        <lookAt x="0" y="0" z="0" />
+        <up x="0" y="1" z="0" />
+        <projection fov="60" near="1" far="2000" />
+    </camera>
+
+    <group> 
+        
+        <group>
+            <transform> 
+                <scale x="4.0" y="4.0" z="4.0" />
+            </transform>
+            <models> 
+                <model file="esfera.3d" />
+            </models>
+        </group>
+
+        <group>
+            <models> <model file="orbita_7.3d" type="line" /> </models>
+            <group>
+                <transform>
+                    <rotate angle="45" x="0" y="1" z="0" /> <translate x="7" y="0" z="0" />         <scale x="0.15" y="0.15" z="0.15" />    </transform>
+                <models> <model file="esfera.3d" /> </models>
+            </group>
+        </group>
+
+        <group>
+            <models> <model file="orbita_11.3d" type="line" /> </models>
+            <group>
+                <transform>
+                    <rotate angle="110" x="0" y="1" z="0" />
+                    <translate x="11" y="0" z="0" />
+                    <scale x="0.35" y="0.35" z="0.35" />
+                </transform>
+                <models> <model file="esfera.3d" /> </models>
+            </group>
+        </group>
+
+        <group>
+            <models> <model file="orbita_16.3d" type="line" /> </models>
+            
+            <group> 
+                <transform>
+                    <rotate angle="190" x="0" y="1" z="0" />
+                    <translate x="16" y="0" z="0" />
+                </transform>
+                
+                <group>
+                    <transform> <scale x="0.4" y="0.4" z="0.4" /> </transform>
+                    <models> <model file="esfera.3d" /> </models>
+                </group>
+
+                <group>
+                    <models> <model file="orbita_2.3d" type="line" /> </models>
+                    <group>
+                        <transform>
+                            <rotate angle="30" x="0" y="1" z="0" />
+                            <translate x="2" y="0" z="0" />
+                            <scale x="0.1" y="0.1" z="0.1" />
+                        </transform>
+                        <models> <model file="esfera.3d" /> </models>
+                    </group>
+                </group>
+            </group>
+        </group>
+
+        <group>
+            <models> <model file="orbita_22.3d" type="line" /> </models>
+            
+            <group> 
+                <transform>
+                    <rotate angle="260" x="0" y="1" z="0" />
+                    <translate x="22" y="0" z="0" />
+                </transform>
+                
+                <group> 
+                    <transform> <scale x="0.3" y="0.3" z="0.3" /> </transform>
+                    <models> <model file="esfera.3d" /> </models>
+                </group>
+
+                <group>
+                    <transform>
+                        <rotate angle="80" x="0" y="1" z="0" />
+                        <translate x="1.5" y="0" z="0" />
+                        <scale x="0.08" y="0.08" z="0.08" />
+                    </transform>
+                    <models> <model file="esfera.3d" /> </models>
+                </group>
+
+                <group>
+                    <transform>
+                        <rotate angle="200" x="0" y="1" z="0" />
+                        <translate x="2.5" y="0" z="0" />
+                        <scale x="0.06" y="0.06" z="0.06" />
+                    </transform>
+                    <models> <model file="esfera.3d" /> </models>
+                </group>
+            </group>
+        </group>
+
+        <group>
+            <models> <model file="orbita_35.3d" type="line" /> </models>
+            <group>
+                <transform>
+                    <rotate angle="40" x="0" y="1" z="0" />
+                    <translate x="35" y="0" z="0" />
+                </transform>
+                
+                <group> 
+                    <transform> <scale x="1.5" y="1.5" z="1.5" /> </transform>
+                    <models> <model file="esfera.3d" /> </models>
+                </group>
+
+                <group>
+                    <models> <model file="orbita_3.3d" type="line" /> </models>
+                    <group>
+                        <transform>
+                            <rotate angle="20" x="0" y="1" z="0" />
+                            <translate x="3" y="0" z="0" />
+                            <scale x="0.1" y="0.1" z="0.1" />
+                        </transform>
+                        <models> <model file="esfera.3d" /> </models>
+                    </group>
+                </group>
+                
+                <group>
+                    <models> <model file="orbita_4.3d" type="line" /> </models>
+                    <group>
+                        <transform>
+                            <rotate angle="150" x="0" y="1" z="0" />
+                            <translate x="4" y="0" z="0" />
+                            <scale x="0.08" y="0.08" z="0.08" />
+                        </transform>
+                        <models> <model file="esfera.3d" /> </models>
+                    </group>
+                </group>
+                
+                <group>
+                    <models> <model file="orbita_5.3d" type="line" /> </models>
+                    <group>
+                        <transform>
+                            <rotate angle="250" x="0" y="1" z="0" />
+                            <translate x="5" y="0" z="0" />
+                            <scale x="0.15" y="0.15" z="0.15" />
+                        </transform>
+                        <models> <model file="esfera.3d" /> </models>
+                    </group>
+                </group>
+            </group>
+        </group>
+
+        <group>
+            <models> <model file="orbita_50.3d" type="line" /> </models>
+            <group>
+                <transform>
+                    <rotate angle="300" x="0" y="1" z="0" />
+                    <translate x="50" y="0" z="0" />
+                </transform>
+
+                <group>
+                    <transform>
+                        <rotate angle="25" x="0" y="0" z="1" /> </transform>
+                    
+                    <group> 
+                        <transform> <scale x="1.2" y="1.2" z="1.2" /> </transform>
+                        <models> <model file="esfera.3d" /> </models>
+                    </group>
+                    
+                    <group> 
+                        <transform> 
+                            <scale x="1.0" y="0.05" z="1.0" /> 
+                        </transform>
+                        <models> <model file="anel_saturno.3d" /> </models>
+                    </group>
+                </group>
+
+                <group>
+                    <models> <model file="orbita_5.3d" type="line" /> </models>
+                    <group>
+                        <transform>
+                            <rotate angle="90" x="0" y="1" z="0" />
+                            <translate x="5" y="0" z="0" />
+                            <scale x="0.15" y="0.15" z="0.15" />
+                        </transform>
+                        <models> <model file="esfera.3d" /> </models>
+                    </group>
+                </group>
+            </group>
+        </group>
+
+        <group>
+            <models> <model file="orbita_65.3d" type="line" /> </models>
+            <group>
+                <transform>
+                    <rotate angle="90" x="0" y="1" z="0" />
+                    <translate x="65" y="0" z="0" />
+                </transform>
+
+                <group>
+                    <transform>
+                        <rotate angle="85" x="0" y="0" z="1" /> </transform>
+                    
+                    <group>
+                        <transform> <scale x="0.8" y="0.8" z="0.8" /> </transform>
+                        <models> <model file="esfera.3d" /> </models>
+                    </group>
+                    
+                    <group> 
+                        <transform>
+                            <scale x="1.0" y="0.05" z="1.0" />
+                        </transform>
+                        <models> <model file="anel_urano.3d" /> </models>
+                    </group>
+                </group>
+            </group>
+        </group>
+
+        <group>
+            <models> <model file="orbita_80.3d" type="line" /> </models>
+            <group>
+                <transform>
+                    <rotate angle="210" x="0" y="1" z="0" />
+                    <translate x="80" y="0" z="0" />
+                    <scale x="0.75" y="0.75" z="0.75" />
+                </transform>
+                <models> <model file="esfera.3d" /> </models>
+            </group>
+        </group>
+
+    </group>
+</world>
