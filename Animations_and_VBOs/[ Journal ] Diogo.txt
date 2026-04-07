@@ -1,0 +1,50 @@
+
+[ 6 de abril 2026 ] - Introdução a fase 3
+
+Na fase 2 construimos a estrutura (árvore). Agora, na fase 3, os objetivos são a performance e as animações.
+Vamos perder o glBegin e o glEnd...
+Até agora usamos o modo imediato do OpenGL. Quando damos begin começamos a ler vértices com um ciclo for, ele está a pegar na memória do CPU e a enviar vértice a vértice até a placa gráfica através de um só canal de ligação, 60x por seg!
+Vai criar um engarrafamento gigante e o programa vai ficar super lento!
+
+Agora vamos implementar os VBOs para termos a memória na própria placa gráfica.
+
+O que fazer:
+na função onde lemos o ficheiro .3d, temos que criar um buffer para a GPU
+e atirar os vertices todos para lá uma única vez no inicio do programa
+depois é so usar tipo cache... com as funções:
+- glGenBuffers
+- glBindBuffer
+- glDrawArrays
+
+A parte das animações.
+De momento nada mexe sozinho. Temos todos os elementos estáticos (tirando a câmara graças ao Nuno) e temos que por os planetas a rodar sobre si mesmo e a sobre o Sol...
+Não podemos apenas somar +1 ao angulo a cada frame porque seria irrialista e não ficaria a fazer as órbitas de forma correta e isto iria depender da potencia de cada computador.
+Para isto, vamos usar o relógio do computador para calcular a posição (coisa habitual em criação de jogos)
+
+No XML em vez de termos <rotate angle...> vamos ter <rotate time="10"...> (significa que demora 10 segundos a dar uma volta completa).
+No c++ vamos usar o glutGet(GLUT_ELAPSED_TIME) para saber quantos millisegundos passaram desde que o programa abriu, e com alguma matemática de regras de 3 simples, calculamos o ângulo exato em que cada planeta deve estar 
+
+Curvas para cometas
+Os cometas não fazem oribitas perfeitas e por isso temos que usar a chamada curva de Catmull-Rom
+Damos 4 ou 5 ponros no espaço e a matemática desenha uma curva super suave a passar por todos eles
+Como fazemos:
+O XML vai passar a aceitra um novo bloco de translação cheio de pontos geométricos. No c++ temso que criar a função que multiplica as matrizes para calcular onde o cometa está a cada segundo em cima dessa linha suave, e também temos de desenhar a prórpia linha/órbita no ecra para se ver o caminho que ele vai percorrer
+
+---
+
+Catmull-Rom
+
+posição P(t): Onde está o objeto na curva. Usamos uma formulação matricial com uma Matriz M especifica de Catmull-Rom
+
+Derivada P'(t): Para que lado o objeto está a "olhar". Se o objeto for uma nave ou um carro, ele tem de estar rodado a direção do movimento
+
+$$P(t) = [t^3 \quad t^2 \quad t \quad 1] \times M \times \begin{bmatrix} P_0 \\ P_1 \\ P_2 \\ P_3 \end{bmatrix}$$
+
+Algoritmo de Alinhamento
+Não basta colocar o objeto no ponto P(t). Temos de contruir uma Matriz de Rotação para o alinhar com o caminho. Para isso, usamos o produto vetorial para calcular os três eixos do objeto(X, Y, Z):
+1. O eixo X é a própria tangente da curva P'(t)
+2. O eixo Z é o resultado de X x Yanterior 
+3. O eixo Y final é Z x X.
+
+Animação por Tempo
+Em vez de ângulos fixos, vamos usar o relógio do sistema: glutGet(GLUT_ELAPSED_TIME). Isto garante que a animação corre à mesma velocidade em qualquer computador
