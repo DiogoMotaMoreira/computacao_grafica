@@ -3,8 +3,111 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
+#include <sstream>
 
 using namespace std;
+
+// usamos a formula de grau 3 de bernstein
+// calculamos o peso de cada um dos 16 pontos de controlo
+float bezier(float t, float p0, float p1, float p2, float p3) {
+	float it = 1.0f - t;
+	return it * it * it * p0 +
+		3 * t * it * it * p1 +
+		3 * t * t * it * p2 +
+		t * t * t * p3;
+}
+
+// calcular o ponto P(u,v) na superficie
+void getBezierPoint(float u, float v, float** patchPoints, float* pos) {
+	float temp[4][3];
+
+	// calcular 4 pontos na direção de U para cada linha
+	for (int i = 0; i < 4; i++) {
+		temp[i][0] = bezier(u, patchPoints[i * 4][0], patchPoints[i * 4 + 1][0], patchPoints[i * 4 + 2][0], patchPoints[i * 4 + 3][0]);
+		temp[i][1] = bezier(u, patchPoints[i * 4][1], patchPoints[i * 4 + 1][1], patchPoints[i * 4 + 2][1], patchPoints[i * 4 + 3][1]);
+		temp[i][2] = bezier(u, patchPoints[i * 4][2], patchPoints[i * 4 + 1][2], patchPoints[i * 4 + 2][2], patchPoints[i * 4 + 3][2]);
+	}
+
+	// calcular ponto fnal na direção V usando os resultados intermédios
+	pos[0] = bezier(v, temp[0][0], temp[1][0], temp[2][0], temp[3][0]);
+	pos[1] = bezier(v, temp[0][1], temp[1][1], temp[2][1], temp[3][1]);
+	pos[2] = bezier(v, temp[0][2], temp[1][2], temp[2][2], temp[3][2]);
+}
+
+void generateBezier(string patchFile, int tessellation, string outFile) {
+	ifstream file(patchFile);
+	if (!file.is_open()) return;
+
+	// indices
+	int numPatches;
+	file >> numPatches;
+	vector<vector<int>> patchIndices(numPatches, vector<int>(16));
+	string line;
+	getline(file, line); // Limpar buffer
+
+	for (int i = 0; i < numPatches; i++) {
+		getline(file, line);
+		stringstream ss(line);
+		for (int j = 0; j < 16; j++) {
+			string val;
+			getline(ss, val, ',');
+			patchIndices[i][j] = stoi(val);
+		}
+	}
+
+	// pontos de controlo
+	int numControlPoints;
+	file >> numControlPoints;
+	vector<float*> controlPoints;
+	for (int i = 0; i < numControlPoints; i++) {
+		float* p = new float[3];
+		file >> p[0]; file.ignore(1); // ignora a virgula
+		file >> p[1]; file.ignore(1);
+		file >> p[2];
+		controlPoints.push_back(p);
+	}
+
+	// vertices
+	vector<float> vertices;
+	float step = 1.0f / tessellation;
+
+	for (int p = 0; p < numPatches; p++) {
+		float* currentPatch[16];
+		for (int i = 0; i < 16; i++) currentPatch[i] = controlPoints[patchIndices[p][i]];
+
+		for (int i = 0; i < tessellation; i++) {
+			for (int j = 0; j < tessellation; j++) {
+				float u1 = i * step, u2 = (i + 1) * step;
+				float v1 = j * step, v2 = (j + 1) * step;
+
+				float p1[3], p2[3], p3[3], p4[3];
+				getBezierPoint(u1, v1, currentPatch, p1);
+				getBezierPoint(u1, v2, currentPatch, p2);
+				getBezierPoint(u2, v1, currentPatch, p3);
+				getBezierPoint(u2, v2, currentPatch, p4);
+
+				// Triângulo 1
+				vertices.push_back(p1[0]); vertices.push_back(p1[1]); vertices.push_back(p1[2]);
+				vertices.push_back(p3[0]); vertices.push_back(p3[1]); vertices.push_back(p3[2]);
+				vertices.push_back(p2[0]); vertices.push_back(p2[1]); vertices.push_back(p2[2]);
+
+				// Triângulo 2
+				vertices.push_back(p2[0]); vertices.push_back(p2[1]); vertices.push_back(p2[2]);
+				vertices.push_back(p3[0]); vertices.push_back(p3[1]); vertices.push_back(p3[2]);
+				vertices.push_back(p4[0]); vertices.push_back(p4[1]); vertices.push_back(p4[2]);
+			}
+		}
+	}
+
+	// save file
+	ofstream out(outFile);
+	out << vertices.size() / 3 << endl;
+	for (int i = 0; i < vertices.size(); i += 3) {
+		out << vertices[i] << " " << vertices[i + 1] << " " << vertices[i + 2] << endl;
+	}
+}
+
 
 void generateBox(float dimension, int divisions, const string& filename) {
 	ofstream file(filename);
@@ -365,9 +468,14 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	string shape = argv[1];
 
-	if (shape == "plane") {
+
+	string shape = argv[1];
+	if (shape == "patch") {
+		generateBezier(argv[2], atoi(argv[3]), argv[4]);
+	}
+
+	else if (shape == "plane") {
 		if (argc != 5) {
 			cout << "# => Erro: generator plane <tamanho> <divisoes> <ficheiro.3d" << endl;
 			return 1;
@@ -378,6 +486,8 @@ int main(int argc, char* argv[]) {
 
 		generatePlane(size, divisions, filename);
 	}
+
+
 	else if (shape == "box") {
 		if (argc != 5) {
 			cout << "# => Erro: generator box <dimensao> <divisoes> <ficheiro.3d" << endl;
