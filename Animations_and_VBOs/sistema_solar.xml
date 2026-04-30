@@ -1,178 +1,237 @@
 <world>
     <window width="1024" height="768" />
     <camera> 
-        <position x="0" y="80" z="150" />
+        <position x="0" y="160" z="350" />
         <lookAt x="0" y="0" z="0" />
         <up x="0" y="1" z="0" />
-        <projection fov="60" near="1" far="2000" />
+        <projection fov="60" near="1" far="4000" />
     </camera>
 
     <group> 
         <group>
             <transform> 
-                <rotate time="20" x="0" y="1" z="0" />
-                <scale x="4.0" y="4.0" z="4.0" />
+                <rotate time="25" x="0" y="1" z="0" />
+                <scale x="5.0" y="5.0" z="5.0" />
             </transform>
             <models> 
                 <model file="esfera.3d" />
             </models>
         </group>
 
+        <!-- Mercurio -->
         <group>
             <transform>
-                <translate time="10">
-                    <point x="7" y="0" z="0" />
-                    <point x="0" y="0" z="7" />
-                    <point x="-7" y="0" z="0" />
-                    <point x="0" y="0" z="-7" />
-                </translate>
-                <rotate time="5" x="0" y="1" z="0" />
-                <scale x="0.15" y="0.15" z="0.15" />
-            </transform>
-            <models> <model file="esfera.3d" /> </models>
-        </group>
-
-        <group>
-            <transform>
-                <translate time="15">
-                    <point x="11" y="0" z="0" />
-                    <point x="0" y="0" z="11" />
-                    <point x="-11" y="0" z="0" />
-                    <point x="0" y="0" z="-11" />
-                </translate>
-                <rotate time="8" x="0" y="1" z="0" />
-                <scale x="0.35" y="0.35" z="0.35" />
-            </transform>
-            <models> <model file="esfera.3d" /> </models>
-        </group>
-
-        <group> 
-            <transform>
-                <translate time="20">
-                    <point x="16" y="0" z="0" />
-                    <point x="0" y="0" z="16" />
-                    <point x="-16" y="0" z="0" />
-                    <point x="0" y="0" z="-16" />
+                <translate time="8.8">
+                    <point x="8" y="0" z="0" />
+                    <point x="5.65" y="0" z="5.65" />
+                    <point x="0" y="0" z="8" />
+                    <point x="-5.65" y="0" z="5.65" />
+                    <point x="-8" y="0" z="0" />
+                    <point x="-5.65" y="0" z="-5.65" />
+                    <point x="0" y="0" z="-8" />
+                    <point x="5.65" y="0" z="-5.65" />
                 </translate>
             </transform>
-            
             <group>
                 <transform>
-                    <rotate time="10" x="0" y="1" z="0" />
-                    <scale x="0.4" y="0.4" z="0.4" />
-                </transform>
-                <models> <model file="esfera.3d" /> </models>
-            </group>
-
-            <group>
-                <transform>
-                    <translate time="4">
-                        <point x="2" y="0" z="0" />
-                        <point x="0" y="0" z="2" />
-                        <point x="-2" y="0" z="0" />
-                        <point x="0" y="0" z="-2" />
-                    </translate>
-                    <scale x="0.1" y="0.1" z="0.1" />
-                </transform>
-                <models> <model file="esfera.3d" /> </models>
-            </group>
-        </group>
-
-        <group> 
-            <transform>
-                <translate time="25">
-                    <point x="22" y="0" z="0" />
-                    <point x="0" y="0" z="22" />
-                    <point x="-22" y="0" z="0" />
-                    <point x="0" y="0" z="-22" />
-                </translate>
-            </transform>
-            
-            <group> 
-                <transform>
-                    <rotate time="12" x="0" y="1" z="0" />
-                    <scale x="0.3" y="0.3" z="0.3" />
-                </transform>
-                <models> <model file="esfera.3d" /> </models>
-            </group>
-
-            <group>
-                <transform>
-                    <translate time="3">
-                        <point x="1.5" y="0" z="0" />
-                        <point x="0" y="0" z="1.5" />
-                        <point x="-1.5" y="0" z="0" />
-                        <point x="0" y="0" z="-1.5" />
-                    </translate>
+                    <rotate time="50" x="0" y="1" z="0" />
                     <scale x="0.08" y="0.08" z="0.08" />
                 </transform>
                 <models> <model file="esfera.3d" /> </models>
             </group>
+        </group>
 
+        <!-- Venus -->
+        <group>
+            <transform>
+                <translate time="22.5">
+                    <point x="13" y="0" z="0" />
+                    <point x="9.2" y="0" z="9.2" />
+                    <point x="0" y="0" z="13" />
+                    <point x="-9.2" y="0" z="9.2" />
+                    <point x="-13" y="0" z="0" />
+                    <point x="-9.2" y="0" z="-9.2" />
+                    <point x="0" y="0" z="-13" />
+                    <point x="9.2" y="0" z="-9.2" />
+                </translate>
+            </transform>
             <group>
                 <transform>
-                    <translate time="5">
-                        <point x="2.5" y="0" z="0" />
-                        <point x="0" y="0" z="2.5" />
-                        <point x="-2.5" y="0" z="0" />
-                        <point x="0" y="0" z="-2.5" />
-                    </translate>
-                    <scale x="0.06" y="0.06" z="0.06" />
+                    <rotate time="120" x="0" y="1" z="0" />
+                    <scale x="0.18" y="0.18" z="0.18" />
                 </transform>
                 <models> <model file="esfera.3d" /> </models>
             </group>
         </group>
 
-        <group>
+        <!-- Terra e Lua -->
+        <group> 
             <transform>
-                <translate time="40">
-                    <point x="35" y="0" z="0" />
-                    <point x="0" y="0" z="35" />
-                    <point x="-35" y="0" z="0" />
-                    <point x="0" y="0" z="-35" />
+                <translate time="36.5">
+                    <point x="19" y="0" z="0" />
+                    <point x="13.4" y="0" z="13.4" />
+                    <point x="0" y="0" z="19" />
+                    <point x="-13.4" y="0" z="13.4" />
+                    <point x="-19" y="0" z="0" />
+                    <point x="-13.4" y="0" z="-13.4" />
+                    <point x="0" y="0" z="-19" />
+                    <point x="13.4" y="0" z="-13.4" />
+                </translate>
+            </transform>
+            
+            <group>
+                <transform>
+                    <rotate time="1" x="0" y="1" z="0" />
+                    <scale x="0.2" y="0.2" z="0.2" />
+                </transform>
+                <models> <model file="esfera.3d" /> </models>
+            </group>
+
+            <group>
+                <transform>
+                    <translate time="2.7">
+                        <point x="1.5" y="0" z="0" />
+                        <point x="1.0" y="0" z="1.0" />
+                        <point x="0" y="0" z="1.5" />
+                        <point x="-1.0" y="0" z="1.0" />
+                        <point x="-1.5" y="0" z="0" />
+                        <point x="-1.0" y="0" z="-1.0" />
+                        <point x="0" y="0" z="-1.5" />
+                        <point x="1.0" y="0" z="-1.0" />
+                    </translate>
+                    <scale x="0.05" y="0.05" z="0.05" />
+                </transform>
+                <models> <model file="esfera.3d" /> </models>
+            </group>
+        </group>
+
+        <!-- Marte e luas -->
+        <group> 
+            <transform>
+                <translate time="68.7">
+                    <point x="26" y="0" z="0" />
+                    <point x="18.4" y="0" z="18.4" />
+                    <point x="0" y="0" z="26" />
+                    <point x="-18.4" y="0" z="18.4" />
+                    <point x="-26" y="0" z="0" />
+                    <point x="-18.4" y="0" z="-18.4" />
+                    <point x="0" y="0" z="-26" />
+                    <point x="18.4" y="0" z="-18.4" />
                 </translate>
             </transform>
             
             <group> 
                 <transform>
-                    <rotate time="5" x="0" y="1" z="0" />
-                    <scale x="1.5" y="1.5" z="1.5" />
+                    <rotate time="1.03" x="0" y="1" z="0" />
+                    <scale x="0.1" y="0.1" z="0.1" />
                 </transform>
                 <models> <model file="esfera.3d" /> </models>
             </group>
 
             <group>
                 <transform>
-                    <translate time="8">
-                        <point x="3" y="0" z="0" />
-                        <point x="0" y="0" z="3" />
-                        <point x="-3" y="0" z="0" />
-                        <point x="0" y="0" z="-3" />
+                    <translate time="0.8">
+                        <point x="0.8" y="0" z="0" />
+                        <point x="0.55" y="0" z="0.55" />
+                        <point x="0" y="0" z="0.8" />
+                        <point x="-0.55" y="0" z="0.55" />
+                        <point x="-0.8" y="0" z="0" />
+                        <point x="-0.55" y="0" z="-0.55" />
+                        <point x="0" y="0" z="-0.8" />
+                        <point x="0.55" y="0" z="-0.55" />
                     </translate>
-                    <scale x="0.1" y="0.1" z="0.1" />
+                    <scale x="0.02" y="0.02" z="0.02" />
+                </transform>
+                <models> <model file="esfera.3d" /> </models>
+            </group>
+
+            <group>
+                <transform>
+                    <translate time="1.5">
+                        <point x="1.2" y="0" z="0" />
+                        <point x="0.85" y="0" z="0.85" />
+                        <point x="0" y="0" z="1.2" />
+                        <point x="-0.85" y="0" z="0.85" />
+                        <point x="-1.2" y="0" z="0" />
+                        <point x="-0.85" y="0" z="-0.85" />
+                        <point x="0" y="0" z="-1.2" />
+                        <point x="0.85" y="0" z="-0.85" />
+                    </translate>
+                    <scale x="0.015" y="0.015" z="0.015" />
                 </transform>
                 <models> <model file="esfera.3d" /> </models>
             </group>
         </group>
 
+        <!-- Cintura de Asteroides -->
         <group>
             <transform>
-                <translate time="60">
+                <rotate time="150" x="0" y="1" z="0" />
+            </transform>
+            <group><transform><translate time="0"><point x="35" y="0.5" z="0"/></translate><scale x="0.05" y="0.05" z="0.05"/><rotate angle="45" x="1" y="1" z="0"/></transform><models><model file="teapot.3d"/></models></group>
+            <group><transform><translate time="0"><point x="25" y="-0.3" z="25"/></translate><scale x="0.03" y="0.03" z="0.03"/><rotate angle="15" x="0" y="1" z="1"/></transform><models><model file="teapot.3d"/></models></group>
+            <group><transform><translate time="0"><point x="0" y="0.8" z="36"/></translate><scale x="0.06" y="0.06" z="0.06"/><rotate angle="90" x="1" y="0" z="0"/></transform><models><model file="teapot.3d"/></models></group>
+            <group><transform><translate time="0"><point x="-25" y="-0.5" z="25"/></translate><scale x="0.04" y="0.04" z="0.04"/><rotate angle="30" x="1" y="1" z="1"/></transform><models><model file="teapot.3d"/></models></group>
+            <group><transform><translate time="0"><point x="-36" y="0.1" z="0"/></translate><scale x="0.05" y="0.05" z="0.05"/><rotate angle="60" x="0" y="1" z="0"/></transform><models><model file="teapot.3d"/></models></group>
+            <group><transform><translate time="0"><point x="-25" y="-0.8" z="-25"/></translate><scale x="0.07" y="0.07" z="0.07"/><rotate angle="120" x="0" y="0" z="1"/></transform><models><model file="teapot.3d"/></models></group>
+            <group><transform><translate time="0"><point x="0" y="0.6" z="-35"/></translate><scale x="0.04" y="0.04" z="0.04"/><rotate angle="45" x="1" y="0" z="1"/></transform><models><model file="teapot.3d"/></models></group>
+            <group><transform><translate time="0"><point x="24" y="0.2" z="-24"/></translate><scale x="0.05" y="0.05" z="0.05"/><rotate angle="10" x="0" y="1" z="0"/></transform><models><model file="teapot.3d"/></models></group>
+            <group><transform><translate time="0"><point x="34" y="-0.6" z="10"/></translate><scale x="0.03" y="0.03" z="0.03"/><rotate angle="80" x="1" y="0" z="0"/></transform><models><model file="teapot.3d"/></models></group>
+            <group><transform><translate time="0"><point x="-10" y="0.4" z="35"/></translate><scale x="0.05" y="0.05" z="0.05"/><rotate angle="25" x="0" y="1" z="1"/></transform><models><model file="teapot.3d"/></models></group>
+        </group>
+
+        <!-- Jupiter e luas -->
+        <group>
+            <transform>
+                <translate time="438">
                     <point x="50" y="0" z="0" />
+                    <point x="35.3" y="0" z="35.3" />
                     <point x="0" y="0" z="50" />
+                    <point x="-35.3" y="0" z="35.3" />
                     <point x="-50" y="0" z="0" />
+                    <point x="-35.3" y="0" z="-35.3" />
                     <point x="0" y="0" z="-50" />
+                    <point x="35.3" y="0" z="-35.3" />
+                </translate>
+            </transform>
+            
+            <group> 
+                <transform>
+                    <rotate time="0.4" x="0" y="1" z="0" />
+                    <scale x="1.2" y="1.2" z="1.2" />
+                </transform>
+                <models> <model file="esfera.3d" /> </models>
+            </group>
+
+            <group><transform><translate time="1.8"><point x="2.5" y="0" z="0"/><point x="1.8" y="0" z="1.8"/><point x="0" y="0" z="2.5"/><point x="-1.8" y="0" z="1.8"/><point x="-2.5" y="0" z="0"/><point x="-1.8" y="0" z="-1.8"/><point x="0" y="0" z="-2.5"/><point x="1.8" y="0" z="-1.8"/></translate><scale x="0.08" y="0.08" z="0.08"/></transform><models><model file="esfera.3d"/></models></group>
+            <group><transform><translate time="3.6"><point x="3.2" y="0" z="0"/><point x="2.3" y="0" z="2.3"/><point x="0" y="0" z="3.2"/><point x="-2.3" y="0" z="2.3"/><point x="-3.2" y="0" z="0"/><point x="-2.3" y="0" z="-2.3"/><point x="0" y="0" z="-3.2"/><point x="2.3" y="0" z="-2.3"/></translate><scale x="0.07" y="0.07" z="0.07"/></transform><models><model file="esfera.3d"/></models></group>
+            <group><transform><translate time="7.2"><point x="4.5" y="0" z="0"/><point x="3.2" y="0" z="3.2"/><point x="0" y="0" z="4.5"/><point x="-3.2" y="0" z="3.2"/><point x="-4.5" y="0" z="0"/><point x="-3.2" y="0" z="-3.2"/><point x="0" y="0" z="-4.5"/><point x="3.2" y="0" z="-3.2"/></translate><scale x="0.12" y="0.12" z="0.12"/></transform><models><model file="esfera.3d"/></models></group>
+            <group><transform><translate time="16.7"><point x="6.0" y="0" z="0"/><point x="4.2" y="0" z="4.2"/><point x="0" y="0" z="6.0"/><point x="-4.2" y="0" z="4.2"/><point x="-6.0" y="0" z="0"/><point x="-4.2" y="0" z="-4.2"/><point x="0" y="0" z="-6.0"/><point x="4.2" y="0" z="-4.2"/></translate><scale x="0.1" y="0.1" z="0.1"/></transform><models><model file="esfera.3d"/></models></group>
+        </group>
+
+        <!-- Saturno, Aneis e Luas -->
+        <group>
+            <transform>
+                <translate time="1058">
+                    <point x="75" y="0" z="0" />
+                    <point x="53.0" y="0" z="53.0" />
+                    <point x="0" y="0" z="75" />
+                    <point x="-53.0" y="0" z="53.0" />
+                    <point x="-75" y="0" z="0" />
+                    <point x="-53.0" y="0" z="-53.0" />
+                    <point x="0" y="0" z="-75" />
+                    <point x="53.0" y="0" z="-53.0" />
                 </translate>
             </transform>
 
             <group>
                 <transform>
                     <rotate angle="25" x="0" y="0" z="1" />
-                    <rotate time="6" x="0" y="1" z="0" />
+                    <rotate time="0.45" x="0" y="1" z="0" />
                 </transform>
                 
                 <group> 
-                    <transform> <scale x="1.2" y="1.2" z="1.2" /> </transform>
+                    <transform> <scale x="1.0" y="1.0" z="1.0" /> </transform>
                     <models> <model file="esfera.3d" /> </models>
                 </group>
                 
@@ -181,19 +240,100 @@
                     <models> <model file="anel_saturno.3d" /> </models>
                 </group>
             </group>
+
+            <group><transform><translate time="16"><point x="4.0" y="0" z="0"/><point x="2.8" y="0" z="2.8"/><point x="0" y="0" z="4.0"/><point x="-2.8" y="0" z="2.8"/><point x="-4.0" y="0" z="0"/><point x="-2.8" y="0" z="-2.8"/><point x="0" y="0" z="-4.0"/><point x="2.8" y="0" z="-2.8"/></translate><scale x="0.15" y="0.15" z="0.15"/></transform><models><model file="esfera.3d"/></models></group>
+            <group><transform><translate time="1.4"><point x="2.0" y="0" z="0"/><point x="1.4" y="0" z="1.4"/><point x="0" y="0" z="2.0"/><point x="-1.4" y="0" z="1.4"/><point x="-2.0" y="0" z="0"/><point x="-1.4" y="0" z="-1.4"/><point x="0" y="0" z="-2.0"/><point x="1.4" y="0" z="-1.4"/></translate><scale x="0.04" y="0.04" z="0.04"/></transform><models><model file="esfera.3d"/></models></group>
+            <group><transform><translate time="4.5"><point x="3.0" y="0" z="0"/><point x="2.1" y="0" z="2.1"/><point x="0" y="0" z="3.0"/><point x="-2.1" y="0" z="2.1"/><point x="-3.0" y="0" z="0"/><point x="-2.1" y="0" z="-2.1"/><point x="0" y="0" z="-3.0"/><point x="2.1" y="0" z="-2.1"/></translate><scale x="0.07" y="0.07" z="0.07"/></transform><models><model file="esfera.3d"/></models></group>
         </group>
 
+        <!-- Urano -->
         <group>
             <transform>
-                <translate time="100">
-                    <point x="80" y="0" z="0" />
-                    <point x="0" y="0" z="80" />
-                    <point x="-80" y="0" z="0" />
-                    <point x="0" y="0" z="-80" />
+                <translate time="3066">
+                    <point x="105" y="0" z="0" />
+                    <point x="74.2" y="0" z="74.2" />
+                    <point x="0" y="0" z="105" />
+                    <point x="-74.2" y="0" z="74.2" />
+                    <point x="-105" y="0" z="0" />
+                    <point x="-74.2" y="0" z="-74.2" />
+                    <point x="0" y="0" z="-105" />
+                    <point x="74.2" y="0" z="-74.2" />
                 </translate>
-                <scale x="0.75" y="0.75" z="0.75" />
             </transform>
-            <models> <model file="esfera.3d" /> </models>
+            <group>
+                <transform>
+                    <rotate angle="98" x="0" y="0" z="1" />
+                    <rotate time="0.7" x="0" y="1" z="0" />
+                    <scale x="0.4" y="0.4" z="0.4" />
+                </transform>
+                <models> <model file="esfera.3d" /> </models>
+            </group>
+
+            <group><transform><translate time="8.7"><point x="2.5" y="0" z="0"/><point x="1.8" y="0" z="1.8"/><point x="0" y="0" z="2.5"/><point x="-1.8" y="0" z="1.8"/><point x="-2.5" y="0" z="0"/><point x="-1.8" y="0" z="-1.8"/><point x="0" y="0" z="-2.5"/><point x="1.8" y="0" z="-1.8"/></translate><scale x="0.06" y="0.06" z="0.06"/></transform><models><model file="esfera.3d"/></models></group>
+            <group><transform><translate time="13.5"><point x="3.5" y="0" z="0"/><point x="2.5" y="0" z="2.5"/><point x="0" y="0" z="3.5"/><point x="-2.5" y="0" z="2.5"/><point x="-3.5" y="0" z="0"/><point x="-2.5" y="0" z="-2.5"/><point x="0" y="0" z="-3.5"/><point x="2.5" y="0" z="-2.5"/></translate><scale x="0.05" y="0.05" z="0.05"/></transform><models><model file="esfera.3d"/></models></group>
+        </group>
+
+        <!-- Neptuno -->
+        <group>
+            <transform>
+                <translate time="6022">
+                    <point x="140" y="0" z="0" />
+                    <point x="99.0" y="0" z="99.0" />
+                    <point x="0" y="0" z="140" />
+                    <point x="-99.0" y="0" z="99.0" />
+                    <point x="-140" y="0" z="0" />
+                    <point x="-99.0" y="0" z="-99.0" />
+                    <point x="0" y="0" z="-140" />
+                    <point x="99.0" y="0" z="-99.0" />
+                </translate>
+            </transform>
+            <group>
+                <transform>
+                    <rotate time="0.67" x="0" y="1" z="0" />
+                    <scale x="0.38" y="0.38" z="0.38" />
+                </transform>
+                <models> <model file="esfera.3d" /> </models>
+            </group>
+
+            <group>
+                <transform>
+                    <translate time="5.8">
+                        <point x="2.2" y="0.5" z="0" />
+                        <point x="1.5" y="0.3" z="1.5" />
+                        <point x="0" y="0" z="2.2" />
+                        <point x="-1.5" y="-0.3" z="1.5" />
+                        <point x="-2.2" y="-0.5" z="0" />
+                        <point x="-1.5" y="-0.3" z="-1.5" />
+                        <point x="0" y="0" z="-2.2" />
+                        <point x="1.5" y="0.3" z="-1.5" />
+                    </translate>
+                    <scale x="0.07" y="0.07" z="0.07" />
+                </transform>
+                <models> <model file="esfera.3d" /> </models>
+            </group>
+        </group>
+
+        <!-- Cometa Halley (exemplo de órbita elíptica alargada) -->
+        <group>
+            <transform>
+                <translate time="200"> 
+                    <point x="0" y="30" z="160" />
+                    <point x="84" y="20" z="112" />
+                    <point x="120" y="10" z="0" />
+                    <point x="84" y="-5" z="-112" />
+                    <point x="0" y="-20" z="-160" />
+                    <point x="-84" y="-10" z="-112" />
+                    <point x="-120" y="0" z="0" />
+                    <point x="-84" y="15" z="112" />
+                </translate>
+                <scale x="0.3" y="0.3" z="0.3" />
+            </transform>
+            <group>
+                <transform> <rotate time="2" x="1" y="1" z="0" /> </transform>
+                <models>
+                    <model file="teapot.3d" />
+                </models>
+            </group>
         </group>
 
     </group>
