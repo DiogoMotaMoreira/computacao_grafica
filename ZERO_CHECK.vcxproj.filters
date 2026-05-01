@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\rafae\source\repos\CG1-Graphical-primitives\CMakeFiles\7de508b3fa2ded5bc263225fac333faa\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8CEBCEC4-5818-3761-A579-2107D8A7E7DA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

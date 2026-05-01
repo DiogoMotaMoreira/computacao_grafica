@@ -1,0 +1,4 @@
+C:/Users/rafae/source/repos/CG1-Graphical-primitives/CMakeFiles/generator.dir
+C:/Users/rafae/source/repos/CG1-Graphical-primitives/CMakeFiles/engine.dir
+C:/Users/rafae/source/repos/CG1-Graphical-primitives/CMakeFiles/ALL_BUILD.dir
+C:/Users/rafae/source/repos/CG1-Graphical-primitives/CMakeFiles/ZERO_CHECK.dir

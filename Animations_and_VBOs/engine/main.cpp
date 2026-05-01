@@ -29,7 +29,11 @@ struct Transform {
     float x, y, z;
     float angle;
     float time; // para transla��es e reota��es com tempo
+    bool align = false;
     vector<float*> points; // Catmull-Rom
+    mutable float prev_y[3] = { 0.0f, 1.0f, 0.0f };
+    mutable GLuint orbitVBO = 0;    
+    mutable int    orbitVertCount = 0;
 };
 
 struct ModelInfo {
@@ -149,6 +153,11 @@ Group parseGroup(XMLElement* groupElement) {
 
             if (trans.type == "translate") {
                 if (trans.time > 0) {
+                    const char* alignAttr = t->Attribute("align");
+                    trans.align = (alignAttr != nullptr &&
+                        (string(alignAttr) == "True" ||
+                         string(alignAttr) == "true" ||
+                         string(alignAttr) == "1"));
                     // L pontos de controlo para Catmull-Rom
                     for (XMLElement* p = t->FirstChildElement("point"); p != nullptr; p = p->NextSiblingElement("point")) {
                         float* pt = new float[3];
@@ -357,71 +366,89 @@ void getCatmullRomPoint(float t, float* p0, float* p1, float* p2, float* p3, flo
     }
 }
 
-// integrar o tempo e a transforma��o
-float prev_y[3] = { 0, 1, 0 };
 
-void applyCatmullTransform(vector<float*> points, float time_duration) {
-    // calcular o t global
+
+
+void applyCatmullTransform(vector<float*> points, float time_duration, bool doAlign, float* prev_y) {
     float elapsed_time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
     float t_global = fmod(elapsed_time, time_duration) / time_duration;
 
     int num_points = points.size();
     float t = t_global * num_points;
     int index = floor(t);
-    t = t - index; // t local entre 0 e 1
+    t = t - index;
 
-    // indices dos 4 pontos de controlo para curvas
     int indices[4];
     for (int i = 0; i < 4; ++i) indices[i] = (index + i - 1 + num_points) % num_points;
+
     float pos[3], deriv[3];
     getCatmullRomPoint(t, points[indices[0]], points[indices[1]], points[indices[2]], points[indices[3]], pos, deriv);
 
-    // transla��o para o ponto da curva
     glTranslatef(pos[0], pos[1], pos[2]);
 
-    // rota��o que temos que fazer para alinhar a tangente
-    float x[3], y[3], z[3];
-    for (int i = 0; i < 3; i++) x[i] = deriv[i];
-    normalize(x); // X = P'(t)
+    // só aplica o referencial de Frenet se align="True"
+    if (doAlign) {
+        float x[3], y[3], z[3];
+        for (int i = 0; i < 3; i++) x[i] = deriv[i];
+        normalize(x);
 
-    cross(x, prev_y, z);
-    normalize(z); // Z = X x Y_prev
-    cross(z, x, y);
-    normalize(y); // Y = Z x X
+        cross(x, prev_y, z);
+        normalize(z);
+        cross(z, x, y);
+        normalize(y);
 
-    for (int i = 0; i < 3; i++) prev_y[i] = y[i]; // Guardar para a proxima frame
+        for (int i = 0; i < 3; i++) prev_y[i] = y[i]; // atualiza o prev_y DESTE transform
 
-    float m[16];
-    buildRotMatrix(x, y, z, m);
-    glMultMatrixf(m); // aplicar a matriz a rota��o
+        float m[16];
+        buildRotMatrix(x, y, z, m);
+        glMultMatrixf(m);
+    }
 }
 
 // ==========================================
 // Desenhar a linha para orbitas
 // ==========================================
-void renderCatmullRomCurve(const vector<float*>& points) {
-    float pos[3], deriv[3];
-    int num_points = points.size();
+void renderCatmullRomCurve(const vector<float*>& points, GLuint& vboID, int& vertCount) {
 
-    glBegin(GL_LINE_LOOP);
-    glColor3f(0.5f, 0.5f, 0.5f); // Cor cinzenta para a �rbita
+    // Gerar o VBO apenas na primeira chamada (lazy init)
+    if (vboID == 0) {
+        vector<float> verts;
+        float pos[3], deriv[3];
+        int n = points.size();
 
-    // N�vel de tessela��o de 0.01 conforme sugerido (100 segmentos por ponto) 
-    for (float gt = 0; gt < 1.0f; gt += 0.001f) {
-        float t_global = gt * num_points;
-        int index = floor(t_global);
-        float t = t_global - index;
+        for (float gt = 0.0f; gt < 1.0f; gt += 0.001f) {
+            float tg = gt * n;
+            int idx = (int)floor(tg);
+            float t = tg - idx;
 
-        int indices[4];
-        for (int i = 0; i < 4; ++i)
-            indices[i] = (index + i - 1 + num_points) % num_points;
+            int ids[4];
+            for (int i = 0; i < 4; ++i)
+                ids[i] = (idx + i - 1 + n) % n;
 
-        getCatmullRomPoint(t, points[indices[0]], points[indices[1]],
-            points[indices[2]], points[indices[3]], pos, deriv);
+            getCatmullRomPoint(t,
+                points[ids[0]], points[ids[1]],
+                points[ids[2]], points[ids[3]],
+                pos, deriv);
 
-        glVertex3f(pos[0], pos[1], pos[2]);
+            verts.push_back(pos[0]);
+            verts.push_back(pos[1]);
+            verts.push_back(pos[2]);
+        }
+
+        vertCount = (int)(verts.size() / 3);
+        glGenBuffers(1, &vboID);
+        glBindBuffer(GL_ARRAY_BUFFER, vboID);
+        glBufferData(GL_ARRAY_BUFFER,
+            sizeof(float) * verts.size(),
+            verts.data(),
+            GL_STATIC_DRAW);
     }
-    glEnd();
+
+    // Desenhar com VBO
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glBindBuffer(GL_ARRAY_BUFFER, vboID);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+    glDrawArrays(GL_LINE_LOOP, 0, vertCount);
 }
 
 
@@ -438,10 +465,10 @@ void drawGroup(const Group& group, int renderMode = 0) {
             if (t.time > 0 && t.points.size() >= 4) {
                 // Desenha a linha da rbita apenas no render normal (renderMode == 0)
                 if (renderMode == 0) {
-                    renderCatmullRomCurve(t.points);
+                    renderCatmullRomCurve(t.points, t.orbitVBO, t.orbitVertCount);
                 }
                 // Depois move o objeto para a sua posi��o atual na curva
-                applyCatmullTransform(t.points, t.time);
+                applyCatmullTransform(t.points, t.time, t.align,t.prev_y);
             }
             else {
                 glTranslatef(t.x, t.y, t.z);
