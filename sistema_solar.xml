@@ -7,6 +7,11 @@
         <projection fov="60" near="1" far="2000" />
     </camera>
 
+    <lights>
+        <!-- Luz pontual situada na origem (o centro do Sol) -->
+        <light type="POINT" posx="0" posy="0" posz="0" />
+    </lights>
+
     <group> 
         <group>
             <transform> 
@@ -14,7 +19,17 @@
                 <scale x="4.0" y="4.0" z="4.0" />
             </transform>
             <models> 
-                <model file="esfera.3d" />
+                <model file="esfera.3d">
+                    <texture file="sol.jpg" />
+                    <color>
+                        <diffuse R="255" G="255" B="255" />
+                        <ambient R="255" G="255" B="255" />
+                        <specular R="0" G="0" B="0" />
+                        <!-- O Sol é a única fonte que emite luz própria -->
+                        <emissive R="255" G="255" B="0" />
+                        <shininess value="0" />
+                    </color>
+                </model>
             </models>
         </group>
 
@@ -29,7 +44,18 @@
                 <rotate time="5" x="0" y="1" z="0" />
                 <scale x="0.15" y="0.15" z="0.15" />
             </transform>
-            <models> <model file="esfera.3d" /> </models>
+            <models> 
+                <model file="esfera.3d">
+                    <texture file="mercurio.jpg" />
+                    <color>
+                        <diffuse R="200" G="200" B="200" />
+                        <ambient R="50" G="50" B="50" />
+                        <specular R="10" G="10" B="10" />
+                        <emissive R="0" G="0" B="0" />
+                        <shininess value="5" />
+                    </color>
+                </model>
+            </models>
         </group>
 
         <group>
@@ -43,7 +69,18 @@
                 <rotate time="8" x="0" y="1" z="0" />
                 <scale x="0.35" y="0.35" z="0.35" />
             </transform>
-            <models> <model file="esfera.3d" /> </models>
+            <models> 
+                <model file="esfera.3d">
+                    <texture file="venus.jpg" />
+                    <color>
+                        <diffuse R="200" G="200" B="200" />
+                        <ambient R="50" G="50" B="50" />
+                        <specular R="10" G="10" B="10" />
+                        <emissive R="0" G="0" B="0" />
+                        <shininess value="5" />
+                    </color>
+                </model>
+            </models>
         </group>
 
         <group> 
@@ -61,7 +98,18 @@
                     <rotate time="10" x="0" y="1" z="0" />
                     <scale x="0.4" y="0.4" z="0.4" />
                 </transform>
-                <models> <model file="esfera.3d" /> </models>
+                <models> 
+                    <model file="esfera.3d">
+                        <texture file="terra.jpg" />
+                        <color>
+                            <diffuse R="200" G="200" B="200" />
+                            <ambient R="50" G="50" B="50" />
+                            <specular R="100" G="100" B="100" />
+                            <emissive R="0" G="0" B="0" />
+                            <shininess value="50" />
+                        </color>
+                    </model>
+                </models>
             </group>
 
             <group>
@@ -74,7 +122,18 @@
                     </translate>
                     <scale x="0.1" y="0.1" z="0.1" />
                 </transform>
-                <models> <model file="esfera.3d" /> </models>
+                <models> 
+                    <model file="esfera.3d">
+                        <texture file="lua.jpg" />
+                        <color>
+                            <diffuse R="150" G="150" B="150" />
+                            <ambient R="50" G="50" B="50" />
+                            <specular R="0" G="0" B="0" />
+                            <emissive R="0" G="0" B="0" />
+                            <shininess value="0" />
+                        </color>
+                    </model>
+                </models>
             </group>
         </group>
 
@@ -93,7 +152,18 @@
                     <rotate time="12" x="0" y="1" z="0" />
                     <scale x="0.3" y="0.3" z="0.3" />
                 </transform>
-                <models> <model file="esfera.3d" /> </models>
+                <models> 
+                    <model file="esfera.3d">
+                        <texture file="marte.jpg" />
+                        <color>
+                            <diffuse R="200" G="100" B="100" />
+                            <ambient R="50" G="25" B="25" />
+                            <specular R="10" G="10" B="10" />
+                            <emissive R="0" G="0" B="0" />
+                            <shininess value="5" />
+                        </color>
+                    </model>
+                </models>
             </group>
 
             <group>
@@ -106,7 +176,18 @@
                     </translate>
                     <scale x="0.08" y="0.08" z="0.08" />
                 </transform>
-                <models> <model file="esfera.3d" /> </models>
+                <models> 
+                    <model file="esfera.3d">
+                        <texture file="fobos.jpg" />
+                        <color>
+                            <diffuse R="150" G="150" B="150" />
+                            <ambient R="50" G="50" B="50" />
+                            <specular R="0" G="0" B="0" />
+                            <emissive R="0" G="0" B="0" />
+                            <shininess value="0" />
+                        </color>
+                    </model>
+                </models>
             </group>
 
             <group>
@@ -119,7 +200,18 @@
                     </translate>
                     <scale x="0.06" y="0.06" z="0.06" />
                 </transform>
-                <models> <model file="esfera.3d" /> </models>
+                <models> 
+                    <model file="esfera.3d">
+                        <texture file="deimos.jpg" />
+                        <color>
+                            <diffuse R="150" G="150" B="150" />
+                            <ambient R="50" G="50" B="50" />
+                            <specular R="0" G="0" B="0" />
+                            <emissive R="0" G="0" B="0" />
+                            <shininess value="0" />
+                        </color>
+                    </model>
+                </models>
             </group>
         </group>
 
@@ -138,7 +230,18 @@
                     <rotate time="5" x="0" y="1" z="0" />
                     <scale x="1.5" y="1.5" z="1.5" />
                 </transform>
-                <models> <model file="esfera.3d" /> </models>
+                <models> 
+                    <model file="esfera.3d">
+                        <texture file="jupiter.jpg" />
+                        <color>
+                            <diffuse R="200" G="200" B="200" />
+                            <ambient R="50" G="50" B="50" />
+                            <specular R="10" G="10" B="10" />
+                            <emissive R="0" G="0" B="0" />
+                            <shininess value="5" />
+                        </color>
+                    </model>
+                </models>
             </group>
 
             <group>
@@ -151,7 +254,18 @@
                     </translate>
                     <scale x="0.1" y="0.1" z="0.1" />
                 </transform>
-                <models> <model file="esfera.3d" /> </models>
+                <models> 
+                    <model file="esfera.3d">
+                        <texture file="europa.jpg" />
+                        <color>
+                            <diffuse R="150" G="150" B="150" />
+                            <ambient R="50" G="50" B="50" />
+                            <specular R="0" G="0" B="0" />
+                            <emissive R="0" G="0" B="0" />
+                            <shininess value="0" />
+                        </color>
+                    </model>
+                </models>
             </group>
         </group>
 
@@ -173,12 +287,34 @@
                 
                 <group> 
                     <transform> <scale x="1.2" y="1.2" z="1.2" /> </transform>
-                    <models> <model file="esfera.3d" /> </models>
+                    <models> 
+                        <model file="esfera.3d">
+                            <texture file="saturno.jpg" />
+                            <color>
+                                <diffuse R="200" G="200" B="200" />
+                                <ambient R="50" G="50" B="50" />
+                                <specular R="10" G="10" B="10" />
+                                <emissive R="0" G="0" B="0" />
+                                <shininess value="5" />
+                            </color>
+                        </model>
+                    </models>
                 </group>
                 
                 <group> 
                     <transform> <scale x="1.0" y="0.05" z="1.0" /> </transform>
-                    <models> <model file="anel_saturno.3d" /> </models>
+                    <models> 
+                        <model file="anel_saturno.3d">
+                            <texture file="anel_saturno.jpg" />
+                            <color>
+                                <diffuse R="200" G="200" B="200" />
+                                <ambient R="50" G="50" B="50" />
+                                <specular R="10" G="10" B="10" />
+                                <emissive R="0" G="0" B="0" />
+                                <shininess value="5" />
+                            </color>
+                        </model>
+                    </models>
                 </group>
             </group>
         </group>
@@ -193,7 +329,18 @@
                 </translate>
                 <scale x="0.75" y="0.75" z="0.75" />
             </transform>
-            <models> <model file="esfera.3d" /> </models>
+            <models> 
+                <model file="esfera.3d">
+                    <texture file="urano.jpg" />
+                    <color>
+                        <diffuse R="200" G="200" B="200" />
+                        <ambient R="50" G="50" B="50" />
+                        <specular R="10" G="10" B="10" />
+                        <emissive R="0" G="0" B="0" />
+                        <shininess value="5" />
+                    </color>
+                </model>
+            </models>
         </group>
 
     </group>
