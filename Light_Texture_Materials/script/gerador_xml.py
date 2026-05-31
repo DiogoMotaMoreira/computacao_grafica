@@ -1,173 +1,286 @@
-import random
 import math
+import random
 
-def gerar_sistema_solar():
-    print("🚀 A iniciar o Gerador do Sistema Solar...")
-    
-    planetas = [
-        {"nome": "Mercurio", "dist_sol": 57.9, "raio": 2439.7, "luas": [], "aneis": None},
-        {"nome": "Venus", "dist_sol": 108.2, "raio": 6051.8, "luas": [], "aneis": None},
-        {"nome": "Terra", "dist_sol": 149.6, "raio": 6371.0, "aneis": None, "luas": [
-            {"nome": "Lua", "dist": 0.38, "raio": 1737.4}
-        ]},
-        {"nome": "Marte", "dist_sol": 227.9, "raio": 3389.5, "aneis": None, "luas": [
-            {"nome": "Fobos", "dist": 0.009, "raio": 11.2},
-            {"nome": "Deimos", "dist": 0.023, "raio": 6.2}
-        ]},
-        {"nome": "Jupiter", "dist_sol": 778.5, "raio": 69911.0, "aneis": None, "luas": [
-            {"nome": "Io", "dist": 0.42, "raio": 1821.6},
-            {"nome": "Europa", "dist": 0.67, "raio": 1560.8},
-            {"nome": "Ganimedes", "dist": 1.07, "raio": 2634.1}
-        ]},
-        {"nome": "Saturno", "dist_sol": 1432.0, "raio": 58232.0, "aneis": {"in": 0.3, "out": 2.5, "tilt": 25}, "luas": [
-            {"nome": "Tita", "dist": 1.22, "raio": 2574.7}
-        ]},
-        {"nome": "Urano", "dist_sol": 2867.0, "raio": 25362.0, "aneis": {"in": 0.1, "out": 1.5, "tilt": 85}, "luas": []},
-        {"nome": "Neptuno", "dist_sol": 4515.0, "raio": 24622.0, "luas": [], "aneis": None}
+PLANETS = [
+        {
+            "nome": "Sol", "tex": "sol.jpg", "scale": 4.0, "dist": 0, "orb": 0, "rot": 500,
+            "colors": {"diff": '0" G="0" B="0', "amb": '0" G="0" B="0', "spec": '0" G="0" B="0', "emi": '255" G="220" B="50', "shin": '0'}
+        },
+        {"nome": "Mercurio", "tex": "mercurio.jpg", "scale": 0.15, "dist": 6, "orb": 20, "rot": 1000},
+        {"nome": "Venus", "tex": "venus.jpg", "scale": 0.3, "dist": 9, "orb": 50, "rot": 2400},
+        {
+            "nome": "Terra", "tex": "terra.jpg", "scale": 0.35, "dist": 13, "orb": 80, "rot": 20,
+            "colors": {"spec": '100" G="100" B="100', "shin": '50'},
+            "moons": [ {"nome": "Lua", "tex": "lua.jpg", "scale": 0.08, "dist": 1.0, "orb": 2.7} ]
+        },
+        {
+            "nome": "Marte", "tex": "marte.jpg", "scale": 0.25, "dist": 17, "orb": 150, "rot": 20,
+            "colors": {"diff": '200" G="100" B="100', "amb": '50" G="25" B="25'},
+            "moons": [
+                {"nome": "Fobos", "tex": "fobos.jpg", "scale": [0.03, 0.02, 0.025], "dist": 0.5, "orb": 0.8},
+                {"nome": "Deimos", "tex": "deimos.jpg", "scale": [0.02, 0.015, 0.022], "dist": 0.8, "orb": 1.5}
+            ]
+        },
+        {
+            "nome": "Jupiter", "tex": "jupiter.jpg", "scale": 1.2, "dist": 30, "orb": 300, "rot": 8,
+            "moons": [
+                {"nome": "Io", "tex": "europa.jpg", "scale": 0.08, "dist": 2.0, "orb": 1.8},
+                {"nome": "Europa", "tex": "europa.jpg", "scale": 0.07, "dist": 2.5, "orb": 3.6},
+                {"nome": "Ganimedes", "tex": "europa.jpg", "scale": 0.12, "dist": 3.2, "orb": 7.2},
+                {"nome": "Calisto", "tex": "europa.jpg", "scale": 0.1, "dist": 4.0, "orb": 16.7}
+            ]
+        },
+        {
+            "nome": "Saturno", "tex": "saturno.jpg", "scale": 1.0, "dist": 40, "orb": 750, "rot": 9, "tilt": 25,
+            "ring": {"file": "anel_saturno.3d", "tex": "anel_saturno.jpg"},
+            "moons": [
+                {"nome": "Tita", "tex": "lua.jpg", "scale": 0.15, "dist": 3.0, "orb": 16},
+                {"nome": "Encelado", "tex": "lua.jpg", "scale": 0.04, "dist": 1.6, "orb": 1.4},
+                {"nome": "Reia", "tex": "lua.jpg", "scale": 0.07, "dist": 2.2, "orb": 4.5}
+            ]
+        },
+        {
+            "nome": "Urano", "tex": "urano.jpg", "scale": 0.7, "dist": 50, "orb": 1500, "rot": 14, "tilt": 98,
+            "ring": {"file": "anel_urano.3d", "tex": "anel_urano.jpg"},
+            "moons": [
+                {"nome": "Titania", "tex": "lua.jpg", "scale": 0.06, "dist": 1.8, "orb": 8.7},
+                {"nome": "Oberon", "tex": "lua.jpg", "scale": 0.05, "dist": 2.4, "orb": 13.5}
+            ]
+        },
+        {
+            "nome": "Neptuno", "tex": "neptuno.jpg", "scale": 0.65, "dist": 60, "orb": 3000, "rot": 13,
+            "moons": [ {"nome": "Tritao", "tex": "lua.jpg", "scale": 0.07, "dist": 1.5, "orb": 5.8} ]
+        }
     ]
 
-    terra_raio = 6371.0
-    terra_dist = 149.6
-    lua_raio = 1737.4
-    lua_dist = 0.38
-    DIST_MULT = 15.0 
-    SIZE_MULT = 0.4  
 
-    comandos_cmd = set()
-    comandos_cmd.add(".\\generator.exe sphere 1 30 30 esfera.3d")
+def catmull_rom_points(radius, y_offset=0.0):
+    """Gera 8 pontos para uma órbita circular via Catmull-Rom"""
+    points = []
+    for i in range(8):
+        angle = 2 * math.pi * i / 8
+        x = round(radius * math.cos(angle), 3)
+        z = round(radius * math.sin(angle), 3)
+        points.append(f'                    <point x="{x}" y="{y_offset}" z="{z}" />')
+    return "\n".join(points)
 
-    targets = [{"nome": "Sol", "x": 0.0, "y": 0.0, "z": 0.0, "dist": 0.0, "radius": 4.0}]
-
-    xml_grupos = "" 
-
-    for i, p in enumerate(planetas):
-        nome = p['nome']
-        dist_vis = round(((p['dist_sol'] / terra_dist) ** 0.6) * DIST_MULT)
-        if dist_vis <= 5: dist_vis = 6
-        size_vis = ((p['raio'] / terra_raio) ** 0.55) * SIZE_MULT
+def write_astro(p):
+    xml = f"        \n"
+    xml += "        <group>\n"
+    
+    # 1. Órbita em redor do Sol
+    if p['dist'] > 0:
+        xml += "            <transform>\n"
+        xml += f'                <translate time="{p["orb"]}">\n'
+        xml += catmull_rom_points(p['dist']) + "\n"
+        xml += "                </translate>\n"
+        xml += "            </transform>\n"
         
-        angulo_orbita = (i * 45 + dist_vis * 7) % 360 
-
-        rad_p = math.radians(angulo_orbita)
-        px = dist_vis * math.cos(rad_p)
-        pz = -dist_vis * math.sin(rad_p)
+    # 2. Grupo de Inclinação (Afeta Planeta e Anéis)
+    xml += "            <group>\n"
+    if 'tilt' in p and p['tilt'] != 0:
+        xml += "                <transform>\n"
+        xml += f'                    <rotate angle="{p["tilt"]}" x="0" y="0" z="1" />\n'
+        xml += "                </transform>\n"
         
-        # Guardamos a coordenada absoluta E o tamanho do astro
-        targets.append({"nome": nome, "x": px, "y": 0.0, "z": pz, "dist": dist_vis, "radius": size_vis})
+    # 3. O Planeta (Rotação própria + Escala)
+    xml += "                <group>\n"
+    xml += "                    <transform>\n"
+    if p['rot'] > 0:
+        xml += f'                        <rotate time="{p["rot"]}" x="0" y="1" z="0" />\n'
+        
+    s = p['scale']
+    if isinstance(s, list): # Suporte para a escala "Batata" (Irregular)
+        xml += f'                        <scale x="{s[0]}" y="{s[1]}" z="{s[2]}" />\n'
+    else:
+        xml += f'                        <scale x="{s}" y="{s}" z="{s}" />\n'
+    xml += "                    </transform>\n"
+    
+    xml += "                    <models>\n"
+    xml += f'                        <model file="esfera.3d" name="{p["nome"]}">\n'
+    xml += f'                            <texture file="{p["tex"]}" />\n'
+    xml += "                            <color>\n"
+    
+    # Extração das cores corrigida (sem conflitos de aspas)
+    c = p.get('colors', {})
+    diff = c.get("diff", '200" G="200" B="200')
+    amb = c.get("amb", '50" G="50" B="50')
+    spec = c.get("spec", '10" G="10" B="10')
+    emi = c.get("emi", '0" G="0" B="0')
+    shin = c.get("shin", '5')
 
-        comandos_cmd.add(f".\\generator.exe orbit {dist_vis} 150 orbita_{dist_vis}.3d")
+    xml += f'                                <diffuse R="{diff}" />\n'
+    xml += f'                                <ambient R="{amb}" />\n'
+    xml += f'                                <specular R="{spec}" />\n'
+    xml += f'                                <emissive R="{emi}" />\n'
+    xml += f'                                <shininess value="{shin}" />\n'
+    
+    xml += "                            </color>\n"
+    xml += "                        </model>\n"
+    xml += "                    </models>\n"
+    xml += "                </group>\n"
+    
+    # 4. Anéis (Dentro da inclinação, fora da rotação própria)
+    if 'ring' in p:
+        r = p['ring']
+        xml += f"                \n"
+        xml += "                <group>\n"
+        xml += "                    <transform>\n"
+        # A escala do anel segue a escala do planeta (mas achatado no Y)
+        xml += f'                        <scale x="{s}" y="0.005" z="{s}" />\n'
+        xml += "                    </transform>\n"
+        xml += "                    <models>\n"
+        xml += f'                        <model file="{r["file"]}" name="Aneis {p["nome"]}" type="ring">\n'
+        xml += f'                            <texture file="{r["tex"]}" />\n'
+        xml += "                            <color>\n"
+        xml += '                                <diffuse R="200" G="200" B="255" />\n'
+        xml += '                                <ambient R="50" G="50" B="50" />\n'
+        xml += "                            </color>\n"
+        xml += "                        </model>\n"
+        xml += "                    </models>\n"
+        xml += "                </group>\n"
+        
+    xml += "            </group>\n" # Fim da Inclinação
+    
+    # 5. Luas
+    for m in p.get('moons', []):
+        xml += write_moon(m)
+        
+    xml += "        </group>\n\n"
+    return xml
 
-        xml_grupos += f'        \n'
-        xml_grupos += '        <group>\n'
-        xml_grupos += f'            <models><model file="orbita_{dist_vis}.3d" type="line" /></models>\n'
-        xml_grupos += '            <group>\n'
-        xml_grupos += '                <transform>\n'
-        xml_grupos += f'                    <rotate angle="{angulo_orbita}" x="0" y="1" z="0" />\n'
-        xml_grupos += f'                    <translate x="{dist_vis}" y="0" z="0" />\n'
-        xml_grupos += '                </transform>\n'
+def write_moon(m):
+    xml = f"            \n"
+    xml += "            <group>\n"
+    xml += "                <transform>\n"
+    xml += f'                    <translate time="{m["orb"]}">\n'
+    xml += catmull_rom_points(m['dist']) + "\n"
+    xml += "                    </translate>\n"
+    s = m['scale']
+    if isinstance(s, list):
+        xml += f'                    <scale x="{s[0]}" y="{s[1]}" z="{s[2]}" />\n'
+    else:
+        xml += f'                    <scale x="{s}" y="{s}" z="{s}" />\n'
+    xml += "                </transform>\n"
+    xml += "                <models>\n"
+    xml += f'                    <model file="esfera.3d" name="{m["nome"]}">\n'
+    xml += f'                        <texture file="{m["tex"]}" />\n'
+    xml += "                        <color>\n"
+    xml += '                            <diffuse R="150" G="150" B="150" />\n'
+    xml += '                            <ambient R="50" G="50" B="50" />\n'
+    xml += '                            <specular R="0" G="0" B="0" />\n'
+    xml += '                            <emissive R="0" G="0" B="0" />\n'
+    xml += '                            <shininess value="0" />\n'
+    xml += "                        </color>\n"
+    xml += "                    </model>\n"
+    xml += "                </models>\n"
+    xml += "            </group>\n"
+    return xml
 
-        if p['aneis']:
-            tilt = p['aneis']['tilt']
-            r_in = p['aneis']['in']
-            r_out = p['aneis']['out']
-            anel_file = f"anel_{nome.lower()}.3d"
-            comandos_cmd.add(f".\\generator.exe torus {r_in} {r_out} 15 40 {anel_file}")
-            
-            xml_grupos += '                <group>\n'
-            xml_grupos += f'                    <transform><rotate angle="{tilt}" x="0" y="0" z="1" /></transform>\n'
-            xml_grupos += f'                    <group><transform><scale x="{size_vis:.3f}" y="{size_vis:.3f}" z="{size_vis:.3f}" /></transform><models><model file="esfera.3d" /></models></group>\n'
-            xml_grupos += f'                    <group><transform><scale x="1.0" y="0.05" z="1.0" /></transform><models><model file="{anel_file}" /></models></group>\n'
-            xml_grupos += '                </group>\n'
-        else:
-            xml_grupos += f'                <group><transform><scale x="{size_vis:.3f}" y="{size_vis:.3f}" z="{size_vis:.3f}" /></transform><models><model file="esfera.3d" /></models></group>\n'
+def write_asteroids():
+    xml = "        \n        <group>\n"
+    xml += '            <transform><rotate time="2000" x="0" y="1" z="0" /></transform>\n'
+    # 250 asteroides garantem impacto visual sem destruir o framerate
+    for _ in range(250):
+        dist = random.uniform(22, 26) # Asteroides espremidos entre Marte e Júpiter
+        y = random.uniform(-0.8, 0.8)
+        angle = random.uniform(0, 360)
+        s = random.uniform(0.01, 0.03)
+        rot = random.uniform(0, 360)
+        xml += "            <group>\n"
+        xml += "                <transform>\n"
+        xml += f'                    <rotate angle="{angle:.1f}" x="0" y="1" z="0" />\n'
+        xml += f'                    <translate x="{dist:.2f}" y="{y:.2f}" z="0" />\n'
+        xml += f'                    <rotate angle="{rot:.1f}" x="1" y="1" z="1" />\n'
+        xml += f'                    <scale x="{s:.3f}" y="{s:.3f}" z="{s:.3f}" />\n'
+        xml += "                </transform>\n"
+        xml += '                <models><model file="teapot.3d">\n'
+        xml += '                    <color><diffuse R="120" G="120" B="120" /><ambient R="30" G="30" B="30" /></color>\n'
+        xml += '                </model></models>\n'
+        xml += "            </group>\n"
+    xml += "        </group>\n\n"
+    return xml
 
-        for lua in p['luas']:
-            nome_lua = lua['nome']
-            dist_lua_vis = round(((lua['dist'] / lua_dist) ** 0.4) * 2.0, 1)
-            if dist_lua_vis < size_vis + 0.5: dist_lua_vis = round(size_vis + 0.8, 1)
-            size_lua_vis = ((lua['raio'] / lua_raio) ** 0.5) * 0.1
-            
-            angulo_lua = hash(nome_lua) % 360
-            
-            rad_m = math.radians(angulo_lua)
-            mx_local = dist_lua_vis * math.cos(rad_m)
-            mz_local = -dist_lua_vis * math.sin(rad_m)
-            mx_pre = mx_local + dist_vis
-            mz_pre = mz_local
-            mx_final = mx_pre * math.cos(rad_p) + mz_pre * math.sin(rad_p)
-            mz_final = -mx_pre * math.sin(rad_p) + mz_pre * math.cos(rad_p)
-            
-            dist_sun = math.sqrt(mx_final**2 + mz_final**2)
-            targets.append({"nome": nome_lua, "x": mx_final, "y": 0.0, "z": mz_final, "dist": dist_sun, "radius": size_lua_vis})
+def write_comet():
+    return """        <group>
+            <transform>
+                <translate time="200" align="True">
+                    <point x="0" y="15" z="60" />
+                    <point x="30" y="10" z="40" />
+                    <point x="45" y="5" z="0" />
+                    <point x="30" y="-2" z="-40" />
+                    <point x="0" y="-10" z="-60" />
+                    <point x="-30" y="-5" z="-40" />
+                    <point x="-45" y="0" z="0" />
+                    <point x="-30" y="7" z="40" />
+                </translate>
+                <scale x="0.15" y="0.15" z="0.15" />
+            </transform>
+            <group>
+                <transform><rotate angle="0" time="5" x="1" y="1" z="0" /></transform>
+                <models>
+                    <model file="teapot.3d" name="Cometa Halley">
+                        <color>
+                            <diffuse R="200" G="200" B="255" />
+                            <ambient R="100" G="100" B="150" />
+                            <specular R="255" G="255" B="255" />
+                            <shininess value="100" />
+                        </color>
+                    </model>
+                </models>
+            </group>
+        </group>
+"""
 
-            comandos_cmd.add(f".\\generator.exe orbit {dist_lua_vis} 60 orbita_lua_{dist_lua_vis}.3d")
-
-            xml_grupos += '                <group>\n'
-            xml_grupos += f'                    <models><model file="orbita_lua_{dist_lua_vis}.3d" type="line" /></models>\n'
-            xml_grupos += '                    <group>\n'
-            xml_grupos += '                        <transform>\n'
-            xml_grupos += f'                            <rotate angle="{angulo_lua}" x="0" y="1" z="0" />\n'
-            xml_grupos += f'                            <translate x="{dist_lua_vis}" y="0" z="0" />\n'
-            xml_grupos += f'                            <scale x="{size_lua_vis:.3f}" y="{size_lua_vis:.3f}" z="{size_lua_vis:.3f}" />\n'
-            xml_grupos += '                        </transform>\n'
-            xml_grupos += '                        <models><model file="esfera.3d" /></models>\n'
-            xml_grupos += '                    </group>\n'
-            xml_grupos += '                </group>\n'
-
-        xml_grupos += '            </group>\n'
-        xml_grupos += '        </group>\n\n'
-
-    targets = sorted(targets, key=lambda t: t['dist'])
+def gerar_sistema_solar():
+    print("🚀 A gerar o Universo (Escala Melhorada)...")
 
     xml = "<world>\n"
-    xml += '    <window width="1024" height="768" />\n'
+    xml += '    <window width="1280" height="720" />\n'
     xml += '    <camera>\n'
-    xml += '        <position x="0" y="80" z="130" />\n'
-    xml += '        <lookAt x="0" y="0" z="0" />\n'
-    xml += '        <up x="0" y="1" z="0" />\n'
-    xml += '        <projection fov="60" near="0.1" far="2000" />\n'
-    xml += '        \n'
-    xml += '        <waypoints>\n'
-    for t in targets:
-        xml += f'            <target name="{t["nome"]}" x="{t["x"]:.2f}" y="{t["y"]:.2f}" z="{t["z"]:.2f}" radius="{t["radius"]:.3f}" />\n'
-    xml += '        </waypoints>\n'
+    # Camara ajustada para nascer mais perto do Sol, olhando para o sistema inteiro!
+    xml += '        <position x="0" y="15" z="35" />\n'
+    xml += '        <projection fov="60" near="1" far="4000" />\n'
     xml += '    </camera>\n\n'
+    xml += '    <lights>\n'
+    xml += '        <light type="POINT" posx="0" posy="0" posz="0" />\n'
+    xml += '    </lights>\n\n'
     xml += '    <group>\n'
     
-    xml += '        <group>\n'
-    xml += '            <transform><scale x="4.0" y="4.0" z="4.0" /></transform>\n'
-    xml += '            <models><model file="esfera.3d" /></models>\n'
-    xml += '        </group>\n\n'
-
-    xml += xml_grupos 
-
-    xml += '        <group>\n'
-    comandos_cmd.add(".\\generator.exe sphere 1 4 4 asteroide.3d")
-    for i in range(800):
-        r = random.uniform(23.0, 35.0) 
-        angle = random.uniform(0.0, 360.0)
-        y_offset = random.uniform(-0.6, 0.6)
-        scale = random.uniform(0.01, 0.04)
-        xml += '            <group>\n'
-        xml += '                <transform>\n'
-        xml += f'                    <rotate angle="{angle:.1f}" x="0" y="1" z="0" />\n'
-        xml += f'                    <translate x="{r:.2f}" y="{y_offset:.2f}" z="0" />\n'
-        xml += f'                    <scale x="{scale:.3f}" y="{scale:.3f}" z="{scale:.3f}" />\n'
-        xml += '                </transform>\n'
-        xml += '                <models><model file="asteroide.3d" /></models>\n' 
-        xml += '            </group>\n'
-    xml += '        </group>\n\n'
-
+    for p in PLANETS:
+        xml += write_astro(p)
+        
+    xml += write_asteroids()
+    xml += write_comet()
+    
     xml += '    </group>\n'
     xml += '</world>\n'
 
-    nome_ficheiro = "sistema_solar.xml"
-    with open(nome_ficheiro, "w", encoding="utf-8") as f:
+    with open("sistema_solar.xml", "w", encoding="utf-8") as f:
         f.write(xml)
 
-    print(f"\n✅ SUCESSO! Ficheiro '{nome_ficheiro}' gerado!")
-    for cmd in sorted(comandos_cmd):
-        print(cmd)
+    print("\n✅ XML Gerado com Sucesso: 'sistema_solar.xml'")
+
+def print_generator_commands():
+    print("\n📦 Comandos para o Generator:")
+    print("-" * 50)
+    
+    # Primitivas base
+    print(".\\generator.exe sphere 1 20 20 esfera.3d")
+    print(".\\generator.exe patch teapot.patch 10 teapot.3d")
+    
+    # Anéis — lê os planetas com 'ring' e extrai os ficheiros
+    for p in PLANETS:
+        if 'ring' in p:
+            ring_file = p['ring']['file']
+            # Saturno: annulus 1.8 3.5, Urano: annulus 2.1 2.8
+            if "saturno" in ring_file:
+                print(f".\\generator.exe annulus 1.8 3.5 128 {ring_file}")
+            elif "urano" in ring_file:
+                print(f".\\generator.exe annulus 2.1 2.8 128 {ring_file}")
+    
+    print("-" * 50)
 
 if __name__ == "__main__":
     gerar_sistema_solar()
+    print_generator_commands()

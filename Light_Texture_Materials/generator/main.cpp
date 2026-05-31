@@ -52,8 +52,12 @@ void getBezierPointAndNormal(float u, float v, float** patchPoints, float* pos, 
 		tangentU[k] = bezierDeriv(u,  tempV[0][k], tempV[1][k], tempV[2][k], tempV[3][k]);
 		tangentV[k] = bezierDeriv(v,  tempU[0][k], tempU[1][k], tempU[2][k], tempU[3][k]);
 	}
-	cross(tangentU, tangentV, normal);
+	cross(tangentV, tangentU, normal);
 	normalize(normal);
+
+	normal[0] = -normal[0];
+	normal[1] = -normal[1];
+	normal[2] = -normal[2];
 }
 
 void generateBezier(string patchFile, int tessellation, string outFile) {
@@ -101,14 +105,15 @@ void generateBezier(string patchFile, int tessellation, string outFile) {
 				getBezierPointAndNormal(u1,v2,currentPatch,p2,n2);
 				getBezierPointAndNormal(u2,v1,currentPatch,p3,n3);
 				getBezierPointAndNormal(u2,v2,currentPatch,p4,n4);
-				// T1
-				for(int k=0;k<3;k++){vertices.push_back(p1[k]);} for(int k=0;k<3;k++){vertices.push_back(n1[k]);} vertices.push_back(u1); vertices.push_back(v1);
-				for(int k=0;k<3;k++){vertices.push_back(p3[k]);} for(int k=0;k<3;k++){vertices.push_back(n3[k]);} vertices.push_back(u2); vertices.push_back(v1);
-				for(int k=0;k<3;k++){vertices.push_back(p2[k]);} for(int k=0;k<3;k++){vertices.push_back(n2[k]);} vertices.push_back(u1); vertices.push_back(v2);
-				// T2
-				for(int k=0;k<3;k++){vertices.push_back(p2[k]);} for(int k=0;k<3;k++){vertices.push_back(n2[k]);} vertices.push_back(u1); vertices.push_back(v2);
-				for(int k=0;k<3;k++){vertices.push_back(p3[k]);} for(int k=0;k<3;k++){vertices.push_back(n3[k]);} vertices.push_back(u2); vertices.push_back(v1);
-				for(int k=0;k<3;k++){vertices.push_back(p4[k]);} for(int k=0;k<3;k++){vertices.push_back(n4[k]);} vertices.push_back(u2); vertices.push_back(v2);
+				// Triângulo 1 (P1-P3-P2) — Ordem invertida para CCW correto
+				for (int k = 0; k < 3; k++) { vertices.push_back(p1[k]); } for (int k = 0; k < 3; k++) { vertices.push_back(n1[k]); } vertices.push_back(u1); vertices.push_back(v1);
+				for (int k = 0; k < 3; k++) { vertices.push_back(p3[k]); } for (int k = 0; k < 3; k++) { vertices.push_back(n3[k]); } vertices.push_back(u2); vertices.push_back(v1);
+				for (int k = 0; k < 3; k++) { vertices.push_back(p2[k]); } for (int k = 0; k < 3; k++) { vertices.push_back(n2[k]); } vertices.push_back(u1); vertices.push_back(v2);
+
+				// Triângulo 2 (P2-P3-P4) — Ordem invertida para CCW correto
+				for (int k = 0; k < 3; k++) { vertices.push_back(p2[k]); } for (int k = 0; k < 3; k++) { vertices.push_back(n2[k]); } vertices.push_back(u1); vertices.push_back(v2);
+				for (int k = 0; k < 3; k++) { vertices.push_back(p3[k]); } for (int k = 0; k < 3; k++) { vertices.push_back(n3[k]); } vertices.push_back(u2); vertices.push_back(v1);
+				for (int k = 0; k < 3; k++) { vertices.push_back(p4[k]); } for (int k = 0; k < 3; k++) { vertices.push_back(n4[k]); } vertices.push_back(u2); vertices.push_back(v2);
 			}
 		}
 	}
@@ -398,6 +403,52 @@ void generateTorus(float innerRadius, float outerRadius, int sides, int rings, c
 	cout << "i => Torus gerado: " << numVertices << " vertices em " << filename << endl;
 }
 
+
+// ==========================================
+// ANNULUS — Disco plano com buraco (para anéis)
+// ==========================================
+void generateAnnulus(float innerRadius, float outerRadius, int segments, const string& filename) {
+	ofstream file(filename);
+	if (!file.is_open()) { cout << "# => Erro ao abrir ficheiro!" << endl; return; }
+
+	int numVertices = segments * 6;
+	file << numVertices << "\n";
+
+	// Numero de repeticoes da textura a volta do anel
+	float repeats = 32.0f;  // Ajusta este valor a gosto (8, 16, 32...)
+
+	for (int i = 0; i < segments; ++i) {
+		float angle1 = (2.0f * M_PI * i) / segments;
+		float angle2 = (2.0f * M_PI * (i + 1)) / segments;
+
+		// V = posicao angular (repete N vezes a volta)
+		float v1 = (float)i / segments * repeats;
+		float v2 = (float)(i + 1) / segments * repeats;
+
+		// U = 0 no raio interno, 1 no raio externo
+		float u_in = 0.0f;
+		float u_out = 1.0f;
+
+		float x1_in = innerRadius * cos(angle1), z1_in = innerRadius * sin(angle1);
+		float x2_in = innerRadius * cos(angle2), z2_in = innerRadius * sin(angle2);
+		float x1_out = outerRadius * cos(angle1), z1_out = outerRadius * sin(angle1);
+		float x2_out = outerRadius * cos(angle2), z2_out = outerRadius * sin(angle2);
+
+		// T1: inner1, inner2, outer1
+		file << x1_in << " 0 " << z1_in << "  0 1 0  " << u_in << " " << v1 << "\n";
+		file << x2_in << " 0 " << z2_in << "  0 1 0  " << u_in << " " << v2 << "\n";
+		file << x1_out << " 0 " << z1_out << "  0 1 0  " << u_out << " " << v1 << "\n";
+
+		// T2: inner2, outer2, outer1
+		file << x2_in << " 0 " << z2_in << "  0 1 0  " << u_in << " " << v2 << "\n";
+		file << x2_out << " 0 " << z2_out << "  0 1 0  " << u_out << " " << v2 << "\n";
+		file << x1_out << " 0 " << z1_out << "  0 1 0  " << u_out << " " << v1 << "\n";
+	}
+
+	file.close();
+	cout << "i => Annulus gerado: " << numVertices << " vertices em " << filename << endl;
+}
+
 // ==========================================
 // ORBIT — linha, sem normais/UVs (nao e carregada pelo engine como modelo)
 // ==========================================
@@ -444,6 +495,10 @@ int main(int argc, char* argv[]) {
 	} else if (shape == "torus") {
 		if (argc != 7) { cout << "generator torus <rIn> <rOut> <sides> <rings> <file.3d>" << endl; return 1; }
 		generateTorus(stof(argv[2]), stof(argv[3]), stoi(argv[4]), stoi(argv[5]), argv[6]);
+	}
+	else if (shape == "annulus") {
+		if (argc != 6) { cout << "generator annulus <rIn> <rOut> <segments> <file.3d>" << endl; return 1; }
+		generateAnnulus(stof(argv[2]), stof(argv[3]), stoi(argv[4]), argv[5]);
 	} else if (shape == "orbit") {
 		if (argc != 5) { cout << "generator orbit <r> <sl> <file.3d>" << endl; return 1; }
 		generateOrbit(stof(argv[2]), stoi(argv[3]), argv[4]);

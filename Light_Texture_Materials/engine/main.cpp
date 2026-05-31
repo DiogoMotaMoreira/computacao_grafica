@@ -18,6 +18,15 @@
 
 #include "tinyxml2.h"
 
+#ifndef GL_MAX_TEXTURE_MAX_ANISOTROPY
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY 0x84FE
+#endif
+#ifndef GL_TEXTURE_MAX_ANISOTROPY
+#define GL_TEXTURE_MAX_ANISOTROPY 0x84FD
+#endif
+
+void updateCameraVectors();
+
 using namespace std;
 using namespace tinyxml2;
 
@@ -76,8 +85,6 @@ struct LightInfo {
 // ==========================================
 // GLOBAIS
 // ==========================================
-vector<Target>    cameraTargets;
-int               currentTargetIndex = 0;
 Group             sceneRoot;
 map<string, VBOModel> modelsVBO;
 map<string, GLuint>   loadedTextures;
@@ -90,19 +97,43 @@ string selectedName  = "";
 map<int, string> idToName;
 
 int   winW = 512, winH = 512;
-float camPosX = 10, camPosY = 10, camPosZ = 10;
+float projFov = 60, projNear = 1, projFar = 4000;
+
+// Posição da câmara
+float camPosX = 0, camPosY = 30, camPosZ = 80;
+
+// Vetores de orientação
+float camYaw = -1.5708f;
+float camPitch = -0.2f;
+
+// Derivados (recalculados a cada frame)
+float camDirX, camDirY, camDirZ;    // Vetor frente
+float camRightX, camRightY, camRightZ;  // Vetor direita
+float camUpX = 0, camUpY = 1, camUpZ = 0;
+
+// Movimento
+float moveSpeed = 0.03f;
+bool  keyW = false, keyA = false, keyS = false, keyD = false;
+bool  keyUp = false, keyDown = false;
+
+// Rato
+bool  mousePressed = false;
+int   lastMouseX = 0, lastMouseY = 0;
+float mouseSensitivity = 0.0015f;
+
 float lookAtX = 0, lookAtY = 0, lookAtZ = 0;
-float upX = 0, upY = 1, upZ = 0;
-float projFov = 60, projNear = 1, projFar = 1000;
-float camAlpha = 0, camBeta = 0.5f, camRadius = 50;
-int   startX, startY, tracking = 0;
+
+
+bool keySpace = false, keyShift = false;
 
 // ==========================================
 // TEXTURAS (STB Image)
 // ==========================================
 GLuint loadTexture(string s) {
     if (loadedTextures.count(s)) return loadedTextures[s];
-    
+
+    stbi_set_flip_vertically_on_load(true);
+
     int w, h, channels;
     unsigned char* data = stbi_load(s.c_str(), &w, &h, &channels, 4);
     if (!data) {
@@ -111,16 +142,29 @@ GLuint loadTexture(string s) {
     }
 
     cout << "=> Textura " << s << " (" << w << "x" << h << ")" << endl;
-    
+
     GLuint texID;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
+
+    // === NOVO: Filtragem Agressiva com Mipmapping ===
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    // Anisotropic filtering (melhora muito a qualidade em ângulos oblíquos)
+    GLfloat maxAnisotropy;
+    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAnisotropy);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAnisotropy);
+    // === FIM NOVO ===
+
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    
+
+    // === NOVO: Gera os mipmaps ===
+    glGenerateMipmap(GL_TEXTURE_2D);
+    // === FIM NOVO ===
+
     stbi_image_free(data);
     loadedTextures[s] = texID;
     return texID;
@@ -253,22 +297,10 @@ void loadConfig(const char* xmlFilename) {
     if (camera) {
         XMLElement* pos  = camera->FirstChildElement("position");
         if (pos)  { pos->QueryFloatAttribute("x",&camPosX); pos->QueryFloatAttribute("y",&camPosY); pos->QueryFloatAttribute("z",&camPosZ); }
-        XMLElement* look = camera->FirstChildElement("lookAt");
-        if (look) { look->QueryFloatAttribute("x",&lookAtX); look->QueryFloatAttribute("y",&lookAtY); look->QueryFloatAttribute("z",&lookAtZ); }
-        XMLElement* up   = camera->FirstChildElement("up");
-        if (up)   { up->QueryFloatAttribute("x",&upX); up->QueryFloatAttribute("y",&upY); up->QueryFloatAttribute("z",&upZ); }
         XMLElement* proj = camera->FirstChildElement("projection");
         if (proj) { proj->QueryFloatAttribute("fov",&projFov); proj->QueryFloatAttribute("near",&projNear); proj->QueryFloatAttribute("far",&projFar); }
-        XMLElement* wp   = camera->FirstChildElement("waypoints");
-        if (wp) {
-            for (XMLElement* tg = wp->FirstChildElement("target"); tg; tg = tg->NextSiblingElement("target")) {
-                Target t;
-                t.name = tg->Attribute("name") ? tg->Attribute("name") : "";
-                t.x=tg->FloatAttribute("x"); t.y=tg->FloatAttribute("y"); t.z=tg->FloatAttribute("z");
-                t.radius=1.0f; tg->QueryFloatAttribute("radius",&t.radius);
-                cameraTargets.push_back(t);
-            }
-        }
+        XMLElement* look = camera->FirstChildElement("lookAt");
+        if (look) { look->QueryFloatAttribute("x", &lookAtX); look->QueryFloatAttribute("y", &lookAtY); look->QueryFloatAttribute("z", &lookAtZ); }
     }
 
     // Parser das luzes
@@ -456,8 +488,18 @@ void drawGroup(const Group& group, int renderMode = 0) {
             glBindBuffer(GL_ARRAY_BUFFER, vbo.verticesID);  glVertexPointer(3, GL_FLOAT, 0, 0);
             glBindBuffer(GL_ARRAY_BUFFER, vbo.normalsID);   glNormalPointer(GL_FLOAT, 0, 0);
             glBindBuffer(GL_ARRAY_BUFFER, vbo.texCoordsID); glTexCoordPointer(2, GL_FLOAT, 0, 0);
-            if (mod.type == "line") glDrawArrays(GL_LINE_LOOP, 0, vbo.vertexCount);
-            else                    glDrawArrays(GL_TRIANGLES, 0, vbo.vertexCount);
+            if (mod.type == "line") {
+                glDrawArrays(GL_LINE_LOOP, 0, vbo.vertexCount);
+            }
+            else if (mod.type == "ring") {
+                // Anéis: desativa culling para ver das duas faces
+                glDisable(GL_CULL_FACE);
+                glDrawArrays(GL_TRIANGLES, 0, vbo.vertexCount);
+                glEnable(GL_CULL_FACE);
+            }
+            else {
+                glDrawArrays(GL_TRIANGLES, 0, vbo.vertexCount);
+            }
         }
     }
 
@@ -482,83 +524,144 @@ void renderText(string text) {
 
 void picking(int x, int y) {
     glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT);
-    glDisable(GL_LIGHTING); glDisable(GL_TEXTURE_2D); glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDisable(GL_LIGHTING); glDisable(GL_TEXTURE_2D);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPushMatrix(); glLoadIdentity();
-    gluLookAt(camPosX,camPosY,camPosZ, lookAtX,lookAtY,lookAtZ, upX,upY,upZ);
+    updateCameraVectors();
+    float lx = camPosX + camDirX;
+    float ly = camPosY + camDirY;
+    float lz = camPosZ + camDirZ;
+    gluLookAt(camPosX, camPosY, camPosZ, lx, ly, lz, camUpX, camUpY, camUpZ);
     drawGroup(sceneRoot, 1);
     glPopMatrix();
     GLint vp[4]; glGetIntegerv(GL_VIEWPORT, vp);
     unsigned char res[4];
-    glReadPixels(x, vp[3]-y-1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, res);
+    glReadPixels(x, vp[3] - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, res);
     int pickedID = res[0];
-    if (pickedID > 0 && idToName.count(pickedID)) { selectedID=pickedID; selectedName=idToName[pickedID]; }
-    else { for (auto& p:idToName) { if(p.second=="Sol"){selectedID=p.first;selectedName=p.second;break;} } }
+    if (pickedID > 0 && idToName.count(pickedID)) {
+        selectedID = pickedID;
+        selectedName = idToName[pickedID];
+    }
+    else {
+        selectedID = 0;
+        selectedName = "";
+    }
     glPopAttrib();
 }
 
 // ==========================================
 // CAMARA
 // ==========================================
-void updateCameraPos() {
-    camPosX = lookAtX + camRadius*cos(camBeta)*sin(camAlpha);
-    camPosY = lookAtY + camRadius*sin(camBeta);
-    camPosZ = lookAtZ + camRadius*cos(camBeta)*cos(camAlpha);
+void updateCameraVectors() {
+    // Recalcula direção a partir de yaw e pitch
+    camDirX = cos(camPitch) * cos(camYaw);
+    camDirY = sin(camPitch);
+    camDirZ = cos(camPitch) * sin(camYaw);
+
+    // Right = Dir x WorldUp
+    float wx = 0, wy = 1, wz = 0;
+    camRightX = camDirY * wz - camDirZ * wy;
+    camRightY = camDirZ * wx - camDirX * wz;
+    camRightZ = camDirX * wy - camDirY * wx;
+    // Normaliza Right
+    float rlen = sqrt(camRightX * camRightX + camRightY * camRightY + camRightZ * camRightZ);
+    if (rlen > 0) { camRightX /= rlen; camRightY /= rlen; camRightZ /= rlen; }
+
+    // Up = Right x Dir
+    camUpX = camRightY * camDirZ - camRightZ * camDirY;
+    camUpY = camRightZ * camDirX - camRightX * camDirZ;
+    camUpZ = camRightX * camDirY - camRightY * camDirX;
 }
 
+void applyMovement() {
+    updateCameraVectors();
+    if (keyW) { camPosX += camDirX * moveSpeed; camPosY += camDirY * moveSpeed; camPosZ += camDirZ * moveSpeed; }
+    if (keyS) { camPosX -= camDirX * moveSpeed; camPosY -= camDirY * moveSpeed; camPosZ -= camDirZ * moveSpeed; }
+    if (keyA) { camPosX -= camRightX * moveSpeed; camPosY -= camRightY * moveSpeed; camPosZ -= camRightZ * moveSpeed; }
+    if (keyD) { camPosX += camRightX * moveSpeed; camPosY += camRightY * moveSpeed; camPosZ += camRightZ * moveSpeed; }
+    if (keySpace) camPosY += moveSpeed;
+    if (keyShift) camPosY -= moveSpeed;
+}
+
+
 void initCamera() {
-    float dx=camPosX-lookAtX, dy=camPosY-lookAtY, dz=camPosZ-lookAtZ;
-    camRadius = sqrt(dx*dx+dy*dy+dz*dz); if(camRadius==0) camRadius=1;
-    camBeta = asin(dy/camRadius); camAlpha = atan2(dx,dz);
-    if (!cameraTargets.empty()) {
-        Target& a=cameraTargets[0];
-        lookAtX=a.x; lookAtY=a.y; lookAtZ=a.z;
-        camRadius=a.radius*10.0f; if(camRadius<0.5f) camRadius=0.5f;
-        updateCameraPos();
+    float dx = lookAtX - camPosX;
+    float dy = lookAtY - camPosY;
+    float dz = lookAtZ - camPosZ;
+    float length = sqrt(dx * dx + dy * dy + dz * dz);
+
+    if (length > 0.0001f) {
+        camPitch = asin(dy / length);
+        camYaw = atan2(dz, dx);
+    }
+    updateCameraVectors();
+}
+
+void processNormalKeys(unsigned char key, int x, int y) {
+    if (glutGetModifiers() & GLUT_ACTIVE_CTRL) { keyW = keyA = keyS = keyD = false; return; }
+    switch (tolower(key)) {
+    case 'w': keyW = true; break;
+    case 's': keyS = true; break;
+    case 'a': keyA = true; break;
+    case 'd': keyD = true; break;
+    case ' ': keySpace = true; break;
+    case 'c': keyShift = true; break;
+    case 27:  exit(0); break;
+    }
+}
+
+void processNormalKeysUp(unsigned char key, int x, int y) {
+    switch (tolower(key)) {
+    case 'w': keyW = false; break;
+    case 's': keyS = false; break;
+    case 'a': keyA = false; break;
+    case 'd': keyD = false; break;
+    case ' ': keySpace = false; break;
+    case 'c': keyShift = false; break;
     }
 }
 
 void processSpecialKeys(int key, int xx, int yy) {
-    if (key==GLUT_KEY_UP)   { camRadius-=camRadius*0.1f; if(camRadius<0.5f) camRadius=0.5f; updateCameraPos(); glutPostRedisplay(); return; }
-    if (key==GLUT_KEY_DOWN) { camRadius+=camRadius*0.1f; updateCameraPos(); glutPostRedisplay(); return; }
-    if (cameraTargets.empty()) return;
-    if      (key==GLUT_KEY_RIGHT) currentTargetIndex=(currentTargetIndex+1)%cameraTargets.size();
-    else if (key==GLUT_KEY_LEFT)  currentTargetIndex=(currentTargetIndex-1+cameraTargets.size())%cameraTargets.size();
-    else return;
-    Target& a=cameraTargets[currentTargetIndex];
-    lookAtX=a.x; lookAtY=a.y; lookAtZ=a.z;
-    camRadius=a.radius*10.0f; if(camRadius<0.5f) camRadius=0.5f;
-    updateCameraPos(); glutPostRedisplay();
+    if (glutGetModifiers() & GLUT_ACTIVE_SHIFT) keyShift = true;
 }
 
-void processNormalKeys(unsigned char key, int x, int y) {
-    switch(key) {
-        case 'a':case 'A': camAlpha-=0.05f; break;
-        case 'd':case 'D': camAlpha+=0.05f; break;
-        case 'w':case 'W': camBeta+=0.05f; if(camBeta>1.5f) camBeta=1.5f; break;
-        case 's':case 'S': camBeta-=0.05f; if(camBeta<-1.5f) camBeta=-1.5f; break;
-    }
-    updateCameraPos(); glutPostRedisplay();
+void processSpecialKeysUp(int key, int xx, int yy) {
+    keyShift = false;
 }
 
 void processMouseButtons(int button, int state, int xx, int yy) {
-    if (state==GLUT_DOWN) {
-        startX=xx; startY=yy;
-        if      (button==GLUT_LEFT_BUTTON)  picking(xx,yy);
-        else if (button==GLUT_RIGHT_BUTTON) tracking=2;
-        else if (button==3) { camRadius-=camRadius*0.1f; if(camRadius<0.5f) camRadius=0.5f; updateCameraPos(); glutPostRedisplay(); }
-        else if (button==4) { camRadius+=camRadius*0.1f; updateCameraPos(); glutPostRedisplay(); }
-    } else if (state==GLUT_UP) tracking=0;
+    // Botão ESQUERDO — rotação da câmara
+    if (button == GLUT_LEFT_BUTTON) {
+        if (state == GLUT_DOWN) { mousePressed = true;  lastMouseX = xx; lastMouseY = yy; }
+        else                      mousePressed = false;
+    }
+    // Botão DIREITO — picking/foco
+    if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP) {
+        picking(xx, yy);
+    }
+    // Scroll
+    if (button == 3) { camPosX += camDirX * 3; camPosY += camDirY * 3; camPosZ += camDirZ * 3; glutPostRedisplay(); }
+    if (button == 4) { camPosX -= camDirX * 3; camPosY -= camDirY * 3; camPosZ -= camDirZ * 3; glutPostRedisplay(); }
 }
 
 void processMouseMotion(int xx, int yy) {
-    if (!tracking) return;
-    if (tracking==2) { camRadius+=(yy-startY)*0.1f; if(camRadius<0.1f) camRadius=0.1f; }
-    startX=xx; startY=yy; updateCameraPos(); glutPostRedisplay();
+    if (!mousePressed) return;
+    int dx = xx - lastMouseX;
+    int dy = yy - lastMouseY;
+    camYaw += dx * mouseSensitivity;
+    camPitch -= dy * mouseSensitivity;
+    // Clamp pitch
+    if (camPitch > 1.5f) camPitch = 1.5f;
+    if (camPitch < -1.5f) camPitch = -1.5f;
+    lastMouseX = xx;
+    lastMouseY = yy;
+    glutPostRedisplay();
 }
 
+
 // ==========================================
-// GLUT
+// GLUTcamYaw = atan2(dz, dx);
 // ==========================================
 void changeSize(int w, int h) {
     if(h==0) h=1;
@@ -569,41 +672,42 @@ void changeSize(int w, int h) {
 }
 
 void renderScene(void) {
+    applyMovement();
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (selectedID > 0) {
-        glLoadIdentity();
-        drawGroup(sceneRoot, 2);
-        lookAtX=selectedX; lookAtY=selectedY; lookAtZ=selectedZ;
-        updateCameraPos();
-    }
+    updateCameraVectors();
+    float lookX = camPosX + camDirX;
+    float lookY = camPosY + camDirY;
+    float lookZ = camPosZ + camDirZ;
 
     glLoadIdentity();
-    gluLookAt(camPosX,camPosY,camPosZ, lookAtX,lookAtY,lookAtZ, upX,upY,upZ);
+    gluLookAt(camPosX, camPosY, camPosZ,
+        lookX, lookY, lookZ,
+        camUpX, camUpY, camUpZ);
 
     applyLights();
 
+    // Eixos
     glDisable(GL_LIGHTING); glDisable(GL_TEXTURE_2D);
     glBegin(GL_LINES);
-    glColor3f(1,0,0); glVertex3f(-100,0,0); glVertex3f(100,0,0);
-    glColor3f(0,1,0); glVertex3f(0,-100,0); glVertex3f(0,100,0);
-    glColor3f(0,0,1); glVertex3f(0,0,-100); glVertex3f(0,0,100);
+    glColor3f(1, 0, 0); glVertex3f(-100, 0, 0); glVertex3f(100, 0, 0);
+    glColor3f(0, 1, 0); glVertex3f(0, -100, 0); glVertex3f(0, 100, 0);
+    glColor3f(0, 0, 1); glVertex3f(0, 0, -100); glVertex3f(0, 0, 100);
     glEnd();
     glEnable(GL_LIGHTING);
 
     drawGroup(sceneRoot, 0);
 
-    if (selectedID>0) renderText("Astro: " + selectedName);
-    else              renderText("Clique num astro para selecionar");
-
     glutSwapBuffers();
+    glutPostRedisplay();
 }
 
 int main(int argc, char** argv) {
     if (argc < 2) { cout << "Uso: engine <ficheiro.xml>" << endl; return 1; }
 
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA | GLUT_MULTISAMPLE);
     glutInitWindowPosition(100,100); glutInitWindowSize(winW, winH);
     glutCreateWindow("Motor 3D - G-Engine Fase 4 (STB)");
 
@@ -628,17 +732,20 @@ int main(int argc, char** argv) {
     glutMouseFunc(processMouseButtons);
     glutMotionFunc(processMouseMotion);
     glutKeyboardFunc(processNormalKeys);
+    glutKeyboardUpFunc(processNormalKeysUp);
     glutSpecialFunc(processSpecialKeys);
+    glutSpecialUpFunc(processSpecialKeysUp);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_LIGHTING);
-    glEnable(GL_RESCALE_NORMAL);
+    glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_MULTISAMPLE);
 
-    float globalAmb[4] = {0.2f, 0.2f, 0.2f, 1.0f};
+    float globalAmb[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmb);
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glutIdleFunc(renderScene);

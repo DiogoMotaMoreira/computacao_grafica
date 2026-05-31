@@ -1,0 +1,54 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\rafae\\source\\repos\\CG1-Graphical-primitives\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F4E1A699-0EAD-3D11-AEEA-E1590278320C}|engine.vcxproj|C:\\Users\\rafae\\source\\repos\\CG1-Graphical-primitives\\Geometric Transforms\\engine\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F4E1A699-0EAD-3D11-AEEA-E1590278320C}|engine.vcxproj|solutionrelative:Geometric Transforms\\engine\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F4E1A699-0EAD-3D11-AEEA-E1590278320C}|engine.vcxproj|C:\\Users\\rafae\\source\\repos\\CG1-Graphical-primitives\\Geometric Transforms\\engine\\tinyxml2.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F4E1A699-0EAD-3D11-AEEA-E1590278320C}|engine.vcxproj|solutionrelative:Geometric Transforms\\engine\\tinyxml2.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "tinyxml2.cpp",
+              "DocumentMoniker": "C:\\Users\\rafae\\source\\repos\\CG1-Graphical-primitives\\Geometric Transforms\\engine\\tinyxml2.cpp",
+              "RelativeDocumentMoniker": "Geometric Transforms\\engine\\tinyxml2.cpp",
+              "ToolTip": "C:\\Users\\rafae\\source\\repos\\CG1-Graphical-primitives\\Geometric Transforms\\engine\\tinyxml2.cpp",
+              "RelativeToolTip": "Geometric Transforms\\engine\\tinyxml2.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-03-24T18:30:57.26Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Users\\rafae\\source\\repos\\CG1-Graphical-primitives\\Geometric Transforms\\engine\\main.cpp",
+              "RelativeDocumentMoniker": "Geometric Transforms\\engine\\main.cpp",
+              "ToolTip": "C:\\Users\\rafae\\source\\repos\\CG1-Graphical-primitives\\Geometric Transforms\\engine\\main.cpp",
+              "RelativeToolTip": "Geometric Transforms\\engine\\main.cpp",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-03-24T18:29:57.256Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
