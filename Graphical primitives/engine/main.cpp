@@ -16,14 +16,14 @@ using namespace std;
 using namespace tinyxml2;
 
 // ==========================================
-// ESTRUTURAS DE DADOS (Memória RAM)
+// ESTRUTURAS DE DADOS (Memï¿½ria RAM)
 // ==========================================
-// O nosso vetor global que guardará todos os vértices lidos dos ficheiros .3d
+// O nosso vetor global que guardarï¿½ todos os vï¿½rtices lidos dos ficheiros .3d
 // Formato: [X1, Y1, Z1, X2, Y2, Z2, ...]
 vector<float> allVertices;
 
 // ==========================================
-// VARIÁVEIS GLOBAIS (Câmara e Janela)
+// VARIï¿½VEIS GLOBAIS (Cï¿½mara e Janela)
 // ==========================================
 // Valores por defeito (caso o XML falhe ou omita algo)
 int winW = 512, winH = 512;
@@ -50,7 +50,7 @@ void load3DFile(const string& filename) {
     }
 
     float x, y, z;
-    // Ler os N vértices e adicionar ao nosso vetor global em memória
+    // Ler os N vï¿½rtices e adicionar ao nosso vetor global em memï¿½ria
     for (int i = 0; i < numVertices; ++i) {
         file >> x >> y >> z;
         allVertices.push_back(x);
@@ -135,7 +135,7 @@ void loadConfig(const char* xmlFilename) {
 }
 
 // ==========================================
-// FUNÇÕES GLUT
+// FUNï¿½ï¿½ES GLUT
 // ==========================================
 void changeSize(int w, int h) {
     if (h == 0) h = 1;
@@ -152,11 +152,11 @@ void changeSize(int w, int h) {
 }
 
 void renderScene(void) {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear buffer
 
-    glLoadIdentity();
+    glLoadIdentity(); // Resetar a matriz modelview
 
-    // Configurar câmara dinâmica
+    // Configurar cï¿½mara dinï¿½mica
     gluLookAt(camPosX, camPosY, camPosZ,
         lookAtX, lookAtY, lookAtZ,
         upX, upY, upZ);
@@ -183,7 +183,7 @@ void renderScene(void) {
     glColor3f(1.0f, 1.0f, 1.0f); // Branco
 
     glBegin(GL_TRIANGLES);
-    // Iteramos de 3 em 3 porque cada vértice tem (X, Y, Z)
+    // Iteramos de 3 em 3 porque cada vï¿½rtice tem (X, Y, Z)
     for (size_t i = 0; i < allVertices.size(); i += 3) {
         glVertex3f(allVertices[i], allVertices[i + 1], allVertices[i + 2]);
     }
@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // 2. Leitura (única) dos dados de Configuração
+    // 2. Leitura (ï¿½nica) dos dados de Configuraï¿½ï¿½o
     cout << "--- A INICIAR MOTOR 3D ---" << endl;
     loadConfig(argv[1]);
 
@@ -216,9 +216,9 @@ int main(int argc, char** argv) {
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);
 
-    // 5. Configurações OpenGL
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    // 5. Configuraï¿½ï¿½es OpenGL
+    glEnable(GL_DEPTH_TEST); // teste de verificar se um pixel deve ser desenhado ou nao oclusao
+    glEnable(GL_CULL_FACE); // culling de faces (nÃ£o desenha as viradas)
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
