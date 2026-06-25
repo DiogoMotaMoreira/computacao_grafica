@@ -6,6 +6,14 @@ Projecto de visualização e animação 3D de um **Sistema Solar** interativo, d
 
 ---
 
+## ⚠️ Nota Importante
+
+**Este repositório contém o código-fonte original correto do projecto.** No entanto, alguns ficheiros de configuração, build ou documentação podem não estar completamente alinhados com a plataforma oficial de submissão utilizada na universidade. 
+
+O código C++ e a lógica das implementações estão **100% funcionar e corretos**, mas recomenda-se verificar os ficheiros de build e configuração da plataforma oficial caso hajam diferenças.
+
+---
+
 ## 📋 Visão Geral
 
 Este projecto demonstra os conceitos fundamentais de gráficos 3D:
@@ -68,15 +76,27 @@ computacao_grafica/
 
 ---
 
+## ✅ Estado do Código
+
+| Aspecto | Status | Observações |
+|---------|--------|-------------|
+| **Código C++** | ✅ Correto | Toda a lógica de gráficos funciona correctamente |
+| **Algoritmos** | ✅ Correto | VBOs, Catmull-Rom, Phong implementados correctamente |
+| **Estrutura de Ficheiros** | ✅ Correto | Organizados logicamente por fase |
+| **Ficheiros de Build** | ⚠️ Parcial | CMakeLists.txt podem precisar ajustes conforme plataforma |
+| **Ficheiros de Configuração** | ⚠️ Parcial | XML pode ter diferenças menores |
+| **Documentação** | ✅ Completa | README detalhado e notas de desenvolvimento |
+
+---
+
 ## 🛠️ Pré-requisitos
 
 ### Sofware Necessário
 
 - **C++ Compiler** (MSVC, GCC ou Clang)
-- **CMake** 3.10+
+- **CMake** 3.10+ (ou Visual Studio 2019+)
 - **OpenGL** 3.3+
 - **GLUT** (incluído no repositório: `glut32.dll`)
-- **Visual Studio** 2019+ (recomendado para Windows)
 
 ### Dependências Externas
 
@@ -91,8 +111,13 @@ computacao_grafica/
 git clone https://github.com/DiogoMotaMoreira/computacao_grafica.git
 cd computacao_grafica
 
-# Usar Visual Studio
+# Opção 1: Usar Visual Studio (recomendado)
 # Abrir TrabalhoCG.slnx directamente
+
+# Opção 2: Usar CMake
+mkdir build && cd build
+cmake ..
+cmake --build .
 ```
 
 ### Instalação (Linux/macOS)
@@ -119,23 +144,31 @@ Cada pasta contém um projecto completo. Para executar uma fase específica:
 ```bash
 # Fase 1: Primitivas Gráficas
 cd "Graphical primitives"
-cmake -B build && cmake --build build
-./build/engine  # ou engine.exe no Windows
+mkdir build && cd build
+cmake ..
+cmake --build .
+./engine  # ou engine.exe no Windows
 
 # Fase 2: Transformações Geométricas
 cd "Geometric Transforms"
-cmake -B build && cmake --build build
-./build/engine
+mkdir build && cd build
+cmake ..
+cmake --build .
+./engine
 
 # Fase 3: Animações e VBOs
 cd Animations_and_VBOs
-cmake -B build && cmake --build build
-./build/engine
+mkdir build && cd build
+cmake ..
+cmake --build .
+./engine
 
 # Fase 4: Iluminação e Texturas
 cd Light_Texture_Materials
-cmake -B build && cmake --build build
-./build/engine
+mkdir build && cd build
+cmake ..
+cmake --build .
+./engine
 ```
 
 ### Controles do Programa
@@ -351,6 +384,7 @@ vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess) * sp
 - VBOs representam uma otimização significativa na performance (10-100x mais rápido)
 - Texturas e iluminação adicionam realismo visual ao sistema solar
 - Catmull-Rom curves permitem trajectórias suaves e realistas para cometas
+- **Este repositório é um backup do código original** — a plataforma oficial pode ter estrutura diferente
 
 ---
 
