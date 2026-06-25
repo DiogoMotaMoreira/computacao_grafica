@@ -367,16 +367,6 @@ vec3 specular = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess) * sp
 
 ---
 
-## 👥 Autor
-
-**Diogo Moreira**
-
-**Curso:** LEI — Licenciatura em Engenharia Informática  
-**Universidade:** Universidade do Minho  
-**Disciplina:** Computação Gráfica
-
----
-
 ## 📄 Notas Adicionais
 
 - Cada fase reutiliza e expande o trabalho anterior
